@@ -3,8 +3,7 @@
 
 @react.component
 let make = () => {
-  let (count, setCount) = React.useState(() => 0)
-
+  let (count, setCount) = React.useState(() => 0) 
   <div className="App">
     <header className="App-header">
       <img src={logo} className="App-logo" alt="logo" />
@@ -15,14 +14,14 @@ let make = () => {
         </button>
       </p>
       <p>
-        {"Edit "->React.string}
+        {"Editss "->React.string}
         <code> {"App.res"->React.string} </code>
         {" and save to test HMR updates."->React.string}
       </p>
       <p>
         <a
           className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          {"Learn React"->React.string}
+          {"Learn Reacts"->React.string}
         </a>
         {" | "->React.string}
         <a

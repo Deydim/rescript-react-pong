@@ -28,12 +28,12 @@ function App(Props) {
                                             return count + 1 | 0;
                                           }));
                             })
-                        }, "count is: " + String(match[0]))), React.createElement("p", undefined, "Edit ", React.createElement("code", undefined, "App.res"), " and save to test HMR updates."), React.createElement("p", undefined, React.createElement("a", {
+                        }, "count is: " + String(match[0]))), React.createElement("p", undefined, "Editss ", React.createElement("code", undefined, "App.res"), " and save to test HMR updates."), React.createElement("p", undefined, React.createElement("a", {
                           className: "App-link",
                           href: "https://reactjs.org",
                           rel: "noopener noreferrer",
                           target: "_blank"
-                        }, "Learn React"), " | ", React.createElement("a", {
+                        }, "Learn Reacts"), " | ", React.createElement("a", {
                           className: "App-link",
                           href: "https://vitejs.dev/guide/features.html",
                           rel: "noopener noreferrer",
