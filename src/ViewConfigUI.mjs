@@ -9,13 +9,21 @@ function ViewConfigUI$Slider(Props) {
   var max = Props.max;
   var min = Props.min;
   var onChange = Props.onChange;
-  return React.createElement(React.Fragment, undefined, React.createElement("tr", undefined, React.createElement("td", undefined, label)), React.createElement("tr", undefined, React.createElement("td", undefined, React.createElement("input", {
+  return React.createElement(React.Fragment, undefined, React.createElement("tr", undefined, React.createElement("td", undefined, label)), React.createElement("tr", undefined, React.createElement("td", {
+                      style: {
+                        paddingBottom: "20px"
+                      }
+                    }, React.createElement("input", {
                           max: max,
                           min: min,
                           type: "range",
                           value: value,
                           onChange: onChange
-                        })), React.createElement("td", undefined, value)));
+                        })), React.createElement("td", {
+                      style: {
+                        paddingBottom: "20px"
+                      }
+                    }, value)));
 }
 
 var Slider = {

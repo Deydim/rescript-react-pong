@@ -20,11 +20,9 @@ function App(Props) {
                 }, React.createElement(ViewConfigUI.make, {
                       config: config,
                       setConfig: match[1]
-                    })), React.createElement("div", undefined, React.createElement("div", {
-                      className: "field"
-                    }, React.createElement(Game.make, {
-                          config: config
-                        }))));
+                    })), React.createElement(Game.make, {
+                  config: config
+                }));
 }
 
 var make = App;

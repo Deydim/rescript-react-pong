@@ -2,14 +2,58 @@
 
 import * as React from "react";
 
+function intToPx(number) {
+  return String(number) + "px";
+}
+
 function Game(Props) {
   var config = Props.config;
-  return React.createElement(React.Fragment, undefined, String(config.field_size), String(config.player_size), String(config.ball_size));
+  var fieldWidth = Math.imul(config.field_size, 22);
+  var fieldHeight = config.field_size / 30 * 440 | 0;
+  var rightPlayerX = fieldWidth - 15 | 0;
+  var playerSize = Math.imul(config.player_size, 10);
+  var ballSize = config.ball_size;
+  var ballX = (fieldWidth - ballSize | 0) / 2 | 0;
+  return React.createElement(React.Fragment, undefined, React.createElement("div", {
+                  className: "field",
+                  style: {
+                    height: String(fieldHeight) + "px",
+                    left: String(300) + "px",
+                    top: String(50) + "px",
+                    width: String(fieldWidth) + "px"
+                  }
+                }), React.createElement("div", {
+                  className: "player",
+                  style: {
+                    height: String(playerSize) + "px",
+                    left: String(300) + "px",
+                    top: String(((fieldHeight - playerSize | 0) / 2 | 0) + 50 | 0) + "px",
+                    width: String(15) + "px"
+                  }
+                }), React.createElement("div", {
+                  className: "player",
+                  style: {
+                    height: String(playerSize) + "px",
+                    left: String(rightPlayerX + 300 | 0) + "px",
+                    top: String(((fieldHeight - playerSize | 0) / 2 | 0) + 50 | 0) + "px",
+                    width: String(15) + "px"
+                  }
+                }), React.createElement("div", {
+                  className: "ball",
+                  style: {
+                    height: String(ballSize) + "px",
+                    left: String(ballX + 300 | 0) + "px",
+                    top: String(((fieldHeight - ballSize | 0) / 2 | 0) + 50 | 0) + "px",
+                    width: String(ballSize) + "px",
+                    borderRadius: String(ballSize / 2 | 0) + "px"
+                  }
+                }));
 }
 
 var make = Game;
 
 export {
+  intToPx ,
   make ,
   
 }

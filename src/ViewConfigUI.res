@@ -3,7 +3,7 @@ module Slider = {
   let make = (~value, ~label, ~max, ~min, ~onChange) => <>
     <tr> <td> {label->React.string} </td> </tr>
     <tr>
-      <td> <input onChange type_="range" min max value /> </td> <td> {value->React.string} </td>
+      <td style={ReactDOMStyle.make(~paddingBottom = "20px", ())}> <input onChange type_="range" min max value /> </td> <td style={ReactDOMStyle.make(~paddingBottom = "20px", ())}> {value->React.string} </td>
     </tr>
   </>
 }

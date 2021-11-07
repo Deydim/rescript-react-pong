@@ -6,6 +6,6 @@ let make = () => {
   let (config, setConfig) = React.useReducer(Config.reducer, initialConfig)
   <>
     <div className="configContainer"> <ViewConfigUI config setConfig /> </div>
-    <div> <div className="field"> <Game config/> </div> </div>
+    <Game config/>
   </>
 }

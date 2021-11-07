@@ -8,8 +8,8 @@ body {
 }
 .field {
   position: absolute;
-  left: 300px;
-  top: 50px;
+  /* left: 300px;
+  top: 50px; */
   border-top: solid green 10px;
   border-bottom: solid green 10px;
   opacity: 0.8;
