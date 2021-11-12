@@ -3,24 +3,18 @@
 import * as Game from "./Game.mjs";
 import * as React from "react";
 import * as Config from "./Config.mjs";
-import * as ViewConfigUI from "./ViewConfigUI.mjs";
+import * as ViewConfig from "./ViewConfig.mjs";
 
 import './App.css'
 ;
 
 function App(Props) {
-  var match = React.useReducer(Config.reducer, {
-        field_size: 25,
-        player_size: 8,
-        ball_size: 16
-      });
+  var match = React.useReducer(Config.reducer, Config.make(undefined));
   var config = match[0];
-  return React.createElement(React.Fragment, undefined, React.createElement("div", {
-                  className: "configContainer"
-                }, React.createElement(ViewConfigUI.make, {
-                      config: config,
-                      setConfig: match[1]
-                    })), React.createElement(Game.make, {
+  return React.createElement(React.Fragment, undefined, React.createElement(ViewConfig.make, {
+                  config: config,
+                  setConfig: match[1]
+                }), React.createElement(Game.make, {
                   config: config
                 }));
 }

@@ -5,13 +5,15 @@ type t = {
 }
 
 type action =
-  | FieldSize(int)
-  | PlayerSize(int)
-  | BallSize(int)
+  | SetFieldSize(int)
+  | SetPlayerSize(int)
+  | SetBallSize(int)
 
 let reducer = (state, action) =>
   switch action {
-  | FieldSize(value) => {...state, field_size: value}
-  | PlayerSize(value) => {...state, player_size: value}
-  | BallSize(value) => {...state, ball_size: value}
+  | SetFieldSize(value) => {...state, field_size: value}
+  | SetPlayerSize(value) => {...state, player_size: value}
+  | SetBallSize(value) => {...state, ball_size: value}
   }
+
+let make = () => {field_size: 25, player_size: 8, ball_size: 16}
