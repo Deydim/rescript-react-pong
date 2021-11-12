@@ -20,7 +20,7 @@ function preventDefault(evt) {
   }
 }
 
-function Game(Props) {
+function ViewGame(Props) {
   var config = Props.config;
   var match = Model.init(config);
   var ballSize = match.ballSize;
@@ -90,7 +90,7 @@ function Game(Props) {
                 }));
 }
 
-var make = Game;
+var make = ViewGame;
 
 export {
   intToPx ,
