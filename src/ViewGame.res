@@ -2,8 +2,6 @@
 external addEventListener: (string, ReactEvent.Keyboard.t => 'a) => unit = "addEventListener"
 @scope("document") @val external removeEventListener: string => unit = "removeEventListener"
 
-open Model
-
 let intToPx = number => number->Belt.Int.toString ++ "px"
 
 let preventDefault = evt =>
@@ -38,19 +36,17 @@ let make = (~config: Config.t) => {
       preventDefault(evt)
       Update.handleUserInput(ReactEvent.Keyboard.key(evt), true)
     })
-    Some(() => removeEventListener("keydown"))
-  })
-  React.useEffect0(() => {
     addEventListener("keyup", evt => {
       preventDefault(evt)
       Update.handleUserInput(ReactEvent.Keyboard.key(evt), false)
     })
-    Some(() => removeEventListener("keyup"))
-  })
-  React.useEffect0(() => {
     Update.tick(~setState, ())
-    None
+    Some(() => {
+        removeEventListener("keyup")
+        removeEventListener("keydown")
+      })
   })
+  
   <>
     <div
       className="field"

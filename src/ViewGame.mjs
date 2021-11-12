@@ -35,24 +35,16 @@ function ViewGame(Props) {
                   preventDefault(evt);
                   return Update.handleUserInput(evt.key, true);
                 }));
-          return (function (param) {
-                    document.removeEventListener("keydown");
-                    
-                  });
-        }), []);
-  React.useEffect((function () {
           document.addEventListener("keyup", (function (evt) {
                   preventDefault(evt);
                   return Update.handleUserInput(evt.key, false);
                 }));
+          Update.tick(setState, undefined, undefined, undefined);
           return (function (param) {
                     document.removeEventListener("keyup");
+                    document.removeEventListener("keydown");
                     
                   });
-        }), []);
-  React.useEffect((function () {
-          Update.tick(setState, undefined, undefined, undefined);
-          
         }), []);
   return React.createElement(React.Fragment, undefined, React.createElement("div", {
                   className: "field",
