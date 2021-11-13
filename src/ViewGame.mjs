@@ -11,6 +11,7 @@ function intToPx(number) {
 function preventDefault(evt) {
   var match = evt.key;
   switch (match) {
+    case " " :
     case "ArrowDown" :
     case "ArrowUp" :
         evt.preventDefault();

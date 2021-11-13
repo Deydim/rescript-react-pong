@@ -1,12 +1,13 @@
 //    TYPES
 
-type game = NotStarted | Playing | Over
-type ballHorizontalDirection = Left | Right
-type ballVerticalDirection = Up | Down
-type ballAngle = Diagonal | Slight | Level
+// type game = NotStarted | Playing | Over
+// type ballHorizontalDirection = Left | Right
+// type ballVerticalDirection = Up | Down
+// type ballAngle = Diagonal | Slight | Level
 type keys = {
   mutable arrowUp: bool,
   mutable arrowDown: bool,
+  mutable space: bool,
 }
 type t = {
   rightPlayerY: int,
@@ -18,7 +19,7 @@ type t = {
   // direction
 }
 
-type keyEvent = Up | Down | StartGame | Nothing
+type action = Up | Down | Nothing | Start
 type init = {
   offsetLeft: int,
   offsetTop: int,
@@ -35,9 +36,9 @@ type init = {
   ballY: int,
 }
 
-//    DATA
+//    INIT
 
-let keys = {arrowUp: false, arrowDown: false}
+let keys = {arrowUp: false, arrowDown: false, space: false}
 
 let init = (config: Config.t) => {
   let offsetLeft = 300
@@ -69,6 +70,8 @@ let init = (config: Config.t) => {
     ballY: ballY,
   }
 }
+
+// STATE
 
 let make = (~rightPlayerY) => {
   rightPlayerY,

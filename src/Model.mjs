@@ -3,7 +3,8 @@
 
 var keys = {
   arrowUp: false,
-  arrowDown: false
+  arrowDown: false,
+  space: false
 };
 
 function init(config) {

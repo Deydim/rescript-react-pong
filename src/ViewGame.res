@@ -7,7 +7,8 @@ let intToPx = number => number->Belt.Int.toString ++ "px"
 let preventDefault = evt =>
   switch ReactEvent.Keyboard.key(evt) {
     | "ArrowUp"
-    | "ArrowDown" => ReactEvent.Keyboard.preventDefault(evt)
+    | "ArrowDown"
+    | " " => ReactEvent.Keyboard.preventDefault(evt)
     | _ => ()
   }
 
@@ -46,7 +47,7 @@ let make = (~config: Config.t) => {
         removeEventListener("keydown")
       })
   })
-  
+
   <>
     <div
       className="field"

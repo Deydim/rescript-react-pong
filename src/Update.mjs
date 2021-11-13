@@ -4,6 +4,27 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
+function updateState(state, action) {
+  switch (action) {
+    case /* Up */0 :
+        return {
+                rightPlayerY: state.rightPlayerY - 5 | 0,
+                keys: state.keys
+              };
+    case /* Down */1 :
+        return {
+                rightPlayerY: state.rightPlayerY + 5 | 0,
+                keys: state.keys
+              };
+    case /* Nothing */2 :
+        return state;
+    case /* Start */3 :
+        console.log("start");
+        return state;
+    
+  }
+}
+
 function handleUserInput(key, isPressed) {
   switch (key) {
     case "ArrowDown" :
@@ -17,27 +38,6 @@ function handleUserInput(key, isPressed) {
   }
 }
 
-function updateState(state, action) {
-  var match = state.keys;
-  if (action !== 1) {
-    if (action !== 0 || !match.arrowUp) {
-      return state;
-    } else {
-      return {
-              rightPlayerY: state.rightPlayerY - 5 | 0,
-              keys: state.keys
-            };
-    }
-  } else if (match.arrowDown) {
-    return {
-            rightPlayerY: state.rightPlayerY + 5 | 0,
-            keys: state.keys
-          };
-  } else {
-    return state;
-  }
-}
-
 function tick(setState, oldTime, time, param) {
   var oldTime$1 = Belt_Option.getWithDefault(oldTime, 0);
   Belt_Option.getWithDefault(time, oldTime$1);
@@ -48,7 +48,7 @@ function tick(setState, oldTime, time, param) {
   var arrowDown = Model.keys.arrowDown;
   if (arrowUp) {
     if (arrowDown || !arrowUp) {
-      return Curry._1(setState, /* Nothing */3);
+      return Curry._1(setState, /* Nothing */2);
     } else {
       return Curry._1(setState, /* Up */0);
     }
@@ -57,13 +57,13 @@ function tick(setState, oldTime, time, param) {
   } else if (arrowUp) {
     return Curry._1(setState, /* Up */0);
   } else {
-    return Curry._1(setState, /* Nothing */3);
+    return Curry._1(setState, /* Nothing */2);
   }
 }
 
 export {
-  handleUserInput ,
   updateState ,
+  handleUserInput ,
   tick ,
   
 }
