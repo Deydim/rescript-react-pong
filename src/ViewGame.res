@@ -4,13 +4,25 @@ external addEventListener: (string, ReactEvent.Keyboard.t => 'a) => unit = "addE
 
 let intToPx = number => number->Belt.Int.toString ++ "px"
 
-let preventDefault = evt =>
+let keyEventHandler = (evt, ~dispatch: Model.action => unit) => {
   switch ReactEvent.Keyboard.key(evt) {
-    | "ArrowUp"
-    | "ArrowDown"
-    | " " => ReactEvent.Keyboard.preventDefault(evt)
-    | _ => ()
+  | "ArrowUp" | "ArrowDown" => {
+      ReactEvent.Keyboard.preventDefault(evt)
+      dispatch(
+        KeyEvent(ReactEvent.Keyboard.type_(evt), ReactEvent.Keyboard.key(evt))
+      )
+    }
+  | " " => {
+      ReactEvent.Keyboard.preventDefault(evt)
+      if ReactEvent.Keyboard.type_(evt) == "keydown" {
+        dispatch(
+          KeyEvent(ReactEvent.Keyboard.type_(evt), ReactEvent.Keyboard.key(evt))
+        )
+      }
+    }
+  | _ => ()
   }
+}
 
 @react.component
 let make = (~config: Config.t) => {
@@ -30,22 +42,25 @@ let make = (~config: Config.t) => {
     ballY,
   } = Model.init(config)
 
-  let (state, setState) = React.useReducer(Update.updateState, Model.make(~rightPlayerY))
-
+  let (state, dispatch) = React.useReducer(
+    Update.updateState, 
+    Model.make(
+      ~rightPlayerY,
+      ~ballSize,
+      ~ballX,
+      ~ballY,
+    )
+  )
+  
   React.useEffect0(() => {
-    addEventListener("keydown", evt => {
-      preventDefault(evt)
-      Update.handleUserInput(ReactEvent.Keyboard.key(evt), true)
-    })
-    addEventListener("keyup", evt => {
-      preventDefault(evt)
-      Update.handleUserInput(ReactEvent.Keyboard.key(evt), false)
-    })
-    Update.tick(~setState, ())
-    Some(() => {
+    addEventListener("keydown", evt => keyEventHandler(evt, ~dispatch))
+    addEventListener("keyup", evt => keyEventHandler(evt, ~dispatch))
+    Some(
+      () => {
         removeEventListener("keyup")
         removeEventListener("keydown")
-      })
+      },
+    )
   })
 
   <>
@@ -90,5 +105,6 @@ let make = (~config: Config.t) => {
         (),
       )}
     />
+    <Update.Tick dispatch state />
   </>
 }

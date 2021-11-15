@@ -1,4 +1,5 @@
 @val external requestAnimationFrame: ('a => unit) => int = "requestAnimationFrame"
+@val external cancelAnimationFrame: int => unit = "cancelAnimationFrame"
 
 let updateState = (state: Model.t, action: Model.action) => {
   switch action {
@@ -11,32 +12,52 @@ let updateState = (state: Model.t, action: Model.action) => {
       rightPlayerY: state.rightPlayerY + 5,
     }
   | Start => {
-      Js.log("start")
-      {state}
+      ...state,
+      game: Playing,
+    }
+  | Pause => {
+      ...state,
+      game: Paused,
+    }
+  | KeyEvent(type_, key) =>
+    switch key {
+    | "ArrowUp" => {...state, keys: {...state.keys, arrowUp: type_ == "keydown"}}
+    | "ArrowDown" => {...state, keys: {...state.keys, arrowDown: type_ == "keydown"}}
+    | " " => {...state, game: state.game == Paused ? Playing : Paused}
+    | _ => state
     }
   | _ => state
   }
 }
 
-let handleUserInput: (string, bool) => unit = (key, isPressed) =>
-  switch key {
-  | "ArrowUp" => Model.keys.arrowUp = isPressed
-  | "ArrowDown" => Model.keys.arrowDown = isPressed
-  // | " " => setState(Start)
-  | _ => ()
-  }
+module Tick = {
+  @react.component
+  let make = (~state: Model.t, ~dispatch: Model.action => unit) => {
+    let (timer, setTimer) = React.useState(() => 0)
+    let (frameCount, setFrameCount) = React.useState(() => 0)
 
-let rec tick = (~setState, ~oldTime=?, ~time=?, ()) => {
-  let oldTime = oldTime->Belt.Option.getWithDefault(0)
-  let time = time->Belt.Option.getWithDefault(oldTime)
-  //let progress = (oldTime - time) / 15 // to be used later with ball movement
-  let timer = requestAnimationFrame(time => tick(~setState, ~oldTime=time, ~time=oldTime, ()))
-  let {arrowUp, arrowDown} = Model.keys
-  open Model
-  switch (arrowUp, arrowDown) {
-  | (true, true) => setState(Nothing)
-  | (_, true) => setState(Down)
-  | (true, _) => setState(Up)
-  | _ => setState(Nothing)
+    let tick = () => {
+      setFrameCount(prev => prev + 1)
+      let {arrowUp, arrowDown} = state.keys
+      switch (arrowUp, arrowDown) {
+      | (true, true) => dispatch(Nothing)
+      | (_, true) => dispatch(Down)
+      | (true, _) => dispatch(Up)
+      | _ => ()
+      }
+      switch state.game {
+      | Paused => ()
+      | Playing => ()
+      | _ => ()
+      }
+    }
+
+    React.useEffect2(() => {
+      if state.game == Playing {
+        setTimer(_ => requestAnimationFrame(tick))
+      }
+      Some(() => cancelAnimationFrame(timer))
+    }, (frameCount, state.game))
+    React.null
   }
 }

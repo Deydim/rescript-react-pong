@@ -3,9 +3,27 @@
 
 var keys = {
   arrowUp: false,
-  arrowDown: false,
-  space: false
+  arrowDown: false
 };
+
+var ballVectorTable = [
+  [
+    5,
+    0.3
+  ],
+  [
+    4,
+    1.2
+  ],
+  [
+    3,
+    2
+  ],
+  [
+    0,
+    0
+  ]
+];
 
 function init(config) {
   var fieldWidth = Math.imul(config.field_size, 22);
@@ -34,15 +52,25 @@ function init(config) {
         };
 }
 
-function make(rightPlayerY) {
+function make(rightPlayerY, ballX, ballY, ballSize) {
   return {
           rightPlayerY: rightPlayerY,
-          keys: keys
+          keys: keys,
+          game: /* Paused */2,
+          ball: {
+            x: ballX,
+            centerX: ballX + (ballSize / 2 | 0) | 0,
+            y: ballY,
+            centerY: ballY + (ballSize / 2 | 0) | 0,
+            speed: 1.9,
+            direction: /* UpRight */1
+          }
         };
 }
 
 export {
   keys ,
+  ballVectorTable ,
   init ,
   make ,
   

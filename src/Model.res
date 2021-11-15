@@ -1,25 +1,34 @@
 //    TYPES
 
-// type game = NotStarted | Playing | Over
+type eventType = string
+type key = string
+type action = Up | Down | Nothing | Start | Pause | KeyEvent(eventType, key)
+type game = Playing | Over | Paused
 // type ballHorizontalDirection = Left | Right
 // type ballVerticalDirection = Up | Down
 // type ballAngle = Diagonal | Slight | Level
 type keys = {
-  mutable arrowUp: bool,
-  mutable arrowDown: bool,
-  mutable space: bool,
+  arrowUp: bool,
+  arrowDown: bool,
 }
+type ballDirection = UpLeft | UpRight | DownLeft | DownRight
+
+type ball = {
+  x: int,
+  centerX: int,
+  y: int,
+  centerY: int,
+  speed: float,
+  direction: ballDirection,
+}
+
 type t = {
   rightPlayerY: int,
   keys: keys,
-  // rightPlayerY,
-  // ballX,
-  // ballY,
-  // speed,
-  // direction
+  game: game,
+  ball: ball,
 }
 
-type action = Up | Down | Nothing | Start
 type init = {
   offsetLeft: int,
   offsetTop: int,
@@ -38,7 +47,8 @@ type init = {
 
 //    INIT
 
-let keys = {arrowUp: false, arrowDown: false, space: false}
+let keys = {arrowUp: false, arrowDown: false}
+let ballVectorTable = [(5, 0.3), (4, 1.2), (3, 2.), (0, 0.)]
 
 let init = (config: Config.t) => {
   let offsetLeft = 300
@@ -73,8 +83,16 @@ let init = (config: Config.t) => {
 
 // STATE
 
-let make = (~rightPlayerY) => {
-  rightPlayerY,
+let make = (~rightPlayerY, ~ballX, ~ballY, ~ballSize) => {
+  rightPlayerY: rightPlayerY,
   keys: keys,
-  // ballX, ballY, speed, direction
+  game: Paused,
+  ball: {
+    x: ballX,
+    centerX: ballX + ballSize / 2,
+    y: ballY,
+    centerY: ballY + ballSize / 2,
+    speed: 1.9,
+    direction: UpRight,
+  },
 }
