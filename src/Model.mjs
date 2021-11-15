@@ -63,7 +63,8 @@ function make(rightPlayerY, ballX, ballY, ballSize) {
             y: ballY,
             centerY: ballY + (ballSize / 2 | 0) | 0,
             speed: 1.9,
-            direction: /* UpRight */1
+            direction: /* UpRight */1,
+            vectorIndex: 0
           }
         };
 }

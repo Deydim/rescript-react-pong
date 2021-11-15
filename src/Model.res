@@ -4,14 +4,18 @@ type eventType = string
 type key = string
 type action = Up | Down | Nothing | Start | Pause | KeyEvent(eventType, key)
 type game = Playing | Over | Paused
-// type ballHorizontalDirection = Left | Right
-// type ballVerticalDirection = Up | Down
-// type ballAngle = Diagonal | Slight | Level
+
+type ballVectorTableIndex = [#0 | #1 | #2 | #3]
+type ballDirection =
+  | UpLeft
+  | UpRight
+  | DownLeft
+  | DownRight
+
 type keys = {
   arrowUp: bool,
   arrowDown: bool,
 }
-type ballDirection = UpLeft | UpRight | DownLeft | DownRight
 
 type ball = {
   x: int,
@@ -20,6 +24,7 @@ type ball = {
   centerY: int,
   speed: float,
   direction: ballDirection,
+  vectorIndex: ballVectorTableIndex
 }
 
 type t = {
@@ -94,5 +99,6 @@ let make = (~rightPlayerY, ~ballX, ~ballY, ~ballSize) => {
     centerY: ballY + ballSize / 2,
     speed: 1.9,
     direction: UpRight,
+    vectorIndex: #0
   },
 }
