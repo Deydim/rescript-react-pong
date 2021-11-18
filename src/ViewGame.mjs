@@ -5,7 +5,7 @@ import * as Model from "./Model.mjs";
 import * as React from "react";
 import * as Update from "./Update.mjs";
 
-function intToPx(number) {
+function floatToPx(number) {
   return String(number) + "px";
 }
 
@@ -15,7 +15,8 @@ function keyEventHandler(evt, dispatch) {
     case " " :
         evt.preventDefault();
         if (evt.type === "keydown") {
-          return Curry._1(dispatch, /* KeyEvent */{
+          return Curry._1(dispatch, {
+                      TAG: /* KeyEvent */1,
                       _0: evt.type,
                       _1: evt.key
                     });
@@ -29,7 +30,8 @@ function keyEventHandler(evt, dispatch) {
       return ;
   }
   evt.preventDefault();
-  return Curry._1(dispatch, /* KeyEvent */{
+  return Curry._1(dispatch, {
+              TAG: /* KeyEvent */1,
               _0: evt.type,
               _1: evt.key
             });
@@ -37,17 +39,15 @@ function keyEventHandler(evt, dispatch) {
 
 function ViewGame(Props) {
   var config = Props.config;
-  var match = Model.init(config);
-  var ballY = match.ballY;
-  var ballX = match.ballX;
-  var ballSize = match.ballSize;
-  var playerWidth = match.playerWidth;
-  var playerSize = match.playerSize;
-  var offsetTop = match.offsetTop;
-  var offsetLeft = match.offsetLeft;
-  var match$1 = React.useReducer(Update.updateState, Model.make(match.rightPlayerY, ballX, ballY, ballSize));
-  var dispatch = match$1[1];
-  var state = match$1[0];
+  var init = Model.init(config);
+  var ballSize = init.ballSize;
+  var playerWidth = init.playerWidth;
+  var playerSize = init.playerSize;
+  var offsetTop = init.offsetTop;
+  var offsetLeft = init.offsetLeft;
+  var match = React.useReducer(Update.updateState, Model.make(init));
+  var dispatch = match[1];
+  var state = match[0];
   React.useEffect((function () {
           document.addEventListener("keydown", (function (evt) {
                   return keyEventHandler(evt, dispatch);
@@ -61,49 +61,57 @@ function ViewGame(Props) {
                     
                   });
         }), []);
+  React.useEffect((function () {
+          Curry._1(dispatch, {
+                TAG: /* UpdateConfig */0,
+                _0: init
+              });
+          
+        }), [config]);
   return React.createElement(React.Fragment, undefined, React.createElement("div", {
                   className: "field",
                   style: {
-                    height: String(match.fieldHeight) + "px",
+                    height: String(init.fieldHeight) + "px",
                     left: String(offsetLeft) + "px",
                     top: String(offsetTop) + "px",
-                    width: String(match.fieldWidth) + "px"
+                    width: String(init.fieldWidth) + "px"
                   }
                 }), React.createElement("div", {
                   className: "player",
                   style: {
                     height: String(playerSize) + "px",
-                    left: String(match.leftPlayerX + offsetLeft | 0) + "px",
-                    top: String(match.leftPlayerY + offsetTop | 0) + "px",
+                    left: String(init.leftPlayerX + offsetLeft) + "px",
+                    top: String(state.leftPlayerY + offsetTop) + "px",
                     width: String(playerWidth) + "px"
                   }
                 }), React.createElement("div", {
                   className: "player",
                   style: {
                     height: String(playerSize) + "px",
-                    left: String(match.rightPlayerX + offsetLeft | 0) + "px",
-                    top: String(state.rightPlayerY + offsetTop | 0) + "px",
+                    left: String(init.rightPlayerX + offsetLeft) + "px",
+                    top: String(state.rightPlayerY + offsetTop) + "px",
                     width: String(playerWidth) + "px"
                   }
                 }), React.createElement("div", {
                   className: "ball",
                   style: {
                     height: String(ballSize) + "px",
-                    left: String(ballX + offsetLeft | 0) + "px",
-                    top: String(ballY + offsetTop | 0) + "px",
+                    left: String(state.ball.x + offsetLeft) + "px",
+                    top: String(state.ball.y + offsetTop) + "px",
                     width: String(ballSize) + "px",
-                    borderRadius: String(ballSize / 2 | 0) + "px"
+                    borderRadius: String(ballSize / 2) + "px"
                   }
                 }), React.createElement(Update.Tick.make, {
                   state: state,
-                  dispatch: dispatch
+                  dispatch: dispatch,
+                  init: init
                 }));
 }
 
 var make = ViewGame;
 
 export {
-  intToPx ,
+  floatToPx ,
   keyEventHandler ,
   make ,
   

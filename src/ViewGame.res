@@ -2,7 +2,7 @@
 external addEventListener: (string, ReactEvent.Keyboard.t => 'a) => unit = "addEventListener"
 @scope("document") @val external removeEventListener: string => unit = "removeEventListener"
 
-let intToPx = number => number->Belt.Int.toString ++ "px"
+let floatToPx = number => number->Belt.Float.toString ++ "px"
 
 let keyEventHandler = (evt, ~dispatch: Model.action => unit) => {
   switch ReactEvent.Keyboard.key(evt) {
@@ -26,6 +26,7 @@ let keyEventHandler = (evt, ~dispatch: Model.action => unit) => {
 
 @react.component
 let make = (~config: Config.t) => {
+  let init = Model.init(config)
   let {
     offsetLeft,
     offsetTop,
@@ -34,22 +35,13 @@ let make = (~config: Config.t) => {
     playerSize,
     playerWidth,
     leftPlayerX,
-    leftPlayerY,
     rightPlayerX,
-    rightPlayerY,
-    ballSize,
-    ballX,
-    ballY,
-  } = Model.init(config)
+    ballSize
+  } = init
 
   let (state, dispatch) = React.useReducer(
     Update.updateState, 
-    Model.make(
-      ~rightPlayerY,
-      ~ballSize,
-      ~ballX,
-      ~ballY,
-    )
+    Model.make(init)
   )
   
   React.useEffect0(() => {
@@ -63,48 +55,53 @@ let make = (~config: Config.t) => {
     )
   })
 
+  React.useEffect1( () => {
+    dispatch(UpdateConfig(init))
+    None
+  }, [config])
+
   <>
     <div
       className="field"
       style={ReactDOMStyle.make(
-        ~left=offsetLeft->intToPx,
-        ~top=offsetTop->intToPx,
-        ~width=fieldWidth->intToPx,
-        ~height=fieldHeight->intToPx,
+        ~left=offsetLeft->floatToPx,
+        ~top=offsetTop->floatToPx,
+        ~width=fieldWidth->floatToPx,
+        ~height=fieldHeight->floatToPx,
         (),
       )}
     />
     <div
       className="player"
       style={ReactDOMStyle.make(
-        ~left=(leftPlayerX + offsetLeft)->intToPx,
-        ~top=(leftPlayerY + offsetTop)->intToPx,
-        ~width=playerWidth->intToPx,
-        ~height=playerSize->intToPx,
+        ~left=(leftPlayerX +. offsetLeft)->floatToPx,
+        ~top=(state.leftPlayerY +. offsetTop)->floatToPx,
+        ~width=playerWidth->floatToPx,
+        ~height=playerSize->floatToPx,
         (),
       )}
     />
     <div
       className="player"
       style={ReactDOMStyle.make(
-        ~left=(rightPlayerX + offsetLeft)->intToPx,
-        ~top=(state.rightPlayerY + offsetTop)->intToPx,
-        ~width=playerWidth->intToPx,
-        ~height=playerSize->intToPx,
+        ~left=(rightPlayerX +. offsetLeft)->floatToPx,
+        ~top=(state.rightPlayerY +. offsetTop)->floatToPx,
+        ~width=playerWidth->floatToPx,
+        ~height=playerSize->floatToPx,
         (),
       )}
     />
     <div
       className="ball"
       style={ReactDOMStyle.make(
-        ~left=(ballX + offsetLeft)->intToPx,
-        ~top=(ballY + offsetTop)->intToPx,
-        ~width=ballSize->intToPx,
-        ~height=ballSize->intToPx,
-        ~borderRadius=(ballSize / 2)->intToPx,
+        ~left=(state.ball.x +. offsetLeft)->floatToPx,
+        ~top=(state.ball.y +. offsetTop)->floatToPx,
+        ~width=ballSize->floatToPx,
+        ~height=ballSize->floatToPx,
+        ~borderRadius=(ballSize /. 2.)->floatToPx,
         (),
       )}
     />
-    <Update.Tick dispatch state />
+    <Update.Tick dispatch state init/>
   </>
 }

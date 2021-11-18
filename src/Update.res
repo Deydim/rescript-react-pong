@@ -3,13 +3,49 @@
 
 let updateState = (state: Model.t, action: Model.action) => {
   switch action {
-  | Up => {
+  | SetFrameTime(time) => {
       ...state,
-      rightPlayerY: state.rightPlayerY - 5,
+      oldTime: time,
     }
-  | Down => {
+  | Collide(init: Model.init) =>
+    Collision.make(state, init)->(
+      ((hor, vert)) => {
+        ...state,
+        ball: {
+          ...state.ball,
+          horizontalDirection: hor->Belt.Option.getWithDefault(state.ball.horizontalDirection),
+          verticalDirection: vert->Belt.Option.getWithDefault(state.ball.verticalDirection),
+        },
+      }
+    )
+
+  | UpdateConfig(init: Model.init) => {
       ...state,
-      rightPlayerY: state.rightPlayerY + 5,
+      fieldLimits: {
+        bottom: init.fieldHeight,
+        right: init.fieldWidth,
+      },
+      ball: {
+        ...state.ball,
+        size: init.ballSize,
+      },
+      playerSize: init.playerSize,
+    }
+  | PlayerUp => {
+      ...state,
+      rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
+      leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
+    }
+  | PlayerDown => {
+      ...state,
+      rightPlayerY: Js.Math.min_float(
+        state.rightPlayerY +. 5.,
+        state.fieldLimits.bottom -. state.playerSize +. 10.,
+      ),
+      leftPlayerY: Js.Math.min_float(
+        state.leftPlayerY +. 5.,
+        state.fieldLimits.bottom -. state.playerSize +. 10.,
+      ),
     }
   | Start => {
       ...state,
@@ -26,38 +62,67 @@ let updateState = (state: Model.t, action: Model.action) => {
     | " " => {...state, game: state.game == Paused ? Playing : Paused}
     | _ => state
     }
-  | _ => state
+  | BallMove(progress) => {
+      let (deltaX, deltaY) = Model.ballVectorTable[(state.ball.vectorIndex :> int)]->(
+        ((vx, vy)) =>
+          switch (state.ball.verticalDirection, state.ball.horizontalDirection) {
+          | (Down, Right) => (vx, vy)
+          | (Up, Right) => (vx, -.vy)
+          | (Up, Left) => (-vx, -.vy)
+          | (Down, Left) => (-vx, vy)
+          }
+      )
+      {
+        ...state,
+        ball: {
+          ...state.ball,
+          x: Js.Math.max_float(
+            state.playerWidth,
+            Js.Math.min_float(
+              state.ball.x +. Belt.Int.toFloat(deltaX) *. state.ball.speed *. progress,
+              state.fieldLimits.right -. state.ball.size -. state.playerWidth,
+            ),
+          ),
+          y: Js.Math.max_float(
+            10.,
+            Js.Math.min_float(
+              state.ball.y +. deltaY *. state.ball.speed *. progress,
+              state.fieldLimits.bottom -. state.ball.size +. 10.,
+            ),
+          ),
+        },
+      }
+    }
   }
 }
 
 module Tick = {
   @react.component
-  let make = (~state: Model.t, ~dispatch: Model.action => unit) => {
-    let (timer, setTimer) = React.useState(() => 0)
-    let (frameCount, setFrameCount) = React.useState(() => 0)
-
-    let tick = () => {
-      setFrameCount(prev => prev + 1)
-      let {arrowUp, arrowDown} = state.keys
-      switch (arrowUp, arrowDown) {
-      | (true, true) => dispatch(Nothing)
-      | (_, true) => dispatch(Down)
-      | (true, _) => dispatch(Up)
+  let make = (~state: Model.t, ~dispatch: Model.action => unit, ~init: Model.init) => {
+    let tick = time => {
+      dispatch(SetFrameTime(time))
+      switch (state.keys.arrowUp, state.keys.arrowDown) {
+      | (false, true) => dispatch(PlayerDown)
+      | (true, false) => dispatch(PlayerUp)
       | _ => ()
       }
-      switch state.game {
-      | Paused => ()
-      | Playing => ()
-      | _ => ()
+      dispatch(Collide(init))
+
+      let progress = (time -. state.oldTime) /. 15.
+      if progress < 2. {
+        dispatch(BallMove(progress))
       }
     }
-
     React.useEffect2(() => {
-      if state.game == Playing {
-        setTimer(_ => requestAnimationFrame(tick))
+      switch state.game {
+      | Playing => Some(requestAnimationFrame(tick))
+      | _ => {
+          Js.log(state)
+          None
+        }
       }
-      Some(() => cancelAnimationFrame(timer))
-    }, (frameCount, state.game))
+      ->Belt.Option.map(timer => () => cancelAnimationFrame(timer))
+    }, (state.oldTime, state.game))
     React.null
   }
 }

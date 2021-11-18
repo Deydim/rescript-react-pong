@@ -27,45 +27,56 @@ var ballVectorTable = [
 
 function init(config) {
   var fieldWidth = Math.imul(config.field_size, 22);
-  var fieldHeight = config.field_size / 30 * 440 | 0;
+  var fieldHeight = config.field_size / 30 * 440;
   var playerSize = Math.imul(config.player_size, 10);
-  var leftPlayerY = (fieldHeight - playerSize | 0) / 2 | 0;
-  var rightPlayerY = (fieldHeight - playerSize | 0) / 2 | 0;
-  var rightPlayerX = fieldWidth - 15 | 0;
+  var leftPlayerY = (fieldHeight - playerSize) / 2;
+  var rightPlayerY = (fieldHeight - playerSize) / 2;
+  var rightPlayerX = fieldWidth - 14;
   var ballSize = config.ball_size;
-  var ballX = (fieldWidth - ballSize | 0) / 2 | 0;
-  var ballY = (fieldHeight - ballSize | 0) / 2 | 0;
+  var ballX = (fieldWidth - ballSize) / 2;
+  var ballY = (fieldHeight - ballSize) / 2;
   return {
           offsetLeft: 300,
           offsetTop: 50,
           fieldWidth: fieldWidth,
           fieldHeight: fieldHeight,
           playerSize: playerSize,
-          playerWidth: 15,
+          playerWidth: 14,
           leftPlayerX: 0,
           leftPlayerY: leftPlayerY,
           rightPlayerX: rightPlayerX,
           rightPlayerY: rightPlayerY,
+          leftPlayerCenterX: 0 + 14 / 2,
+          rightPlayerCenterX: rightPlayerX + 14 / 2,
           ballSize: ballSize,
           ballX: ballX,
           ballY: ballY
         };
 }
 
-function make(rightPlayerY, ballX, ballY, ballSize) {
+function make(param) {
   return {
-          rightPlayerY: rightPlayerY,
+          rightPlayerY: param.rightPlayerY,
+          leftPlayerY: param.leftPlayerY,
+          playerWidth: param.playerWidth,
           keys: keys,
           game: /* Paused */2,
+          horizontalCollision: undefined,
           ball: {
-            x: ballX,
-            centerX: ballX + (ballSize / 2 | 0) | 0,
-            y: ballY,
-            centerY: ballY + (ballSize / 2 | 0) | 0,
-            speed: 1.9,
-            direction: /* UpRight */1,
-            vectorIndex: 0
-          }
+            x: param.ballX,
+            y: param.ballY,
+            size: param.ballSize,
+            speed: 0.8,
+            horizontalDirection: /* Left */0,
+            verticalDirection: /* Down */0,
+            vectorIndex: 1
+          },
+          fieldLimits: {
+            bottom: param.fieldHeight,
+            right: param.fieldWidth
+          },
+          playerSize: param.playerSize,
+          oldTime: 0
         };
 }
 

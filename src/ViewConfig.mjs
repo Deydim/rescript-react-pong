@@ -39,7 +39,7 @@ function ViewConfig(Props) {
                               onChange: (function (evt) {
                                   return Curry._1(setConfig, {
                                               TAG: /* SetFieldSize */0,
-                                              _0: evt.target.value
+                                              _0: evt.target.value | 0
                                             });
                                 })
                             }), React.createElement(ViewConfig$Slider, {
@@ -50,7 +50,7 @@ function ViewConfig(Props) {
                               onChange: (function (evt) {
                                   return Curry._1(setConfig, {
                                               TAG: /* SetPlayerSize */1,
-                                              _0: evt.target.value
+                                              _0: evt.target.value | 0
                                             });
                                 })
                             }), React.createElement(ViewConfig$Slider, {
@@ -61,7 +61,7 @@ function ViewConfig(Props) {
                               onChange: (function (evt) {
                                   return Curry._1(setConfig, {
                                               TAG: /* SetBallSize */2,
-                                              _0: evt.target.value
+                                              _0: evt.target.value | 0
                                             });
                                 })
                             })))));

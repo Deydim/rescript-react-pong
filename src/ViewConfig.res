@@ -20,21 +20,22 @@ let make = (~config: Config.t, ~setConfig: Config.action => unit) => {
             value={config.field_size->Belt.Int.toString}
             max="40"
             min="10"
-            onChange={evt => setConfig(SetFieldSize(ReactEvent.Form.target(evt)["value"]))}
+            onChange={evt => setConfig(SetFieldSize(ReactEvent.Form.target(evt)["value"]->Belt.Float.toInt))}
           />
           <Slider
             label="Player size"
             value={config.player_size->Belt.Int.toString}
             max="20"
             min="6"
-            onChange={evt => setConfig(SetPlayerSize(ReactEvent.Form.target(evt)["value"]))}
+            onChange={evt => setConfig(SetPlayerSize(ReactEvent.Form.target(evt)["value"]->Belt.Float.toInt))}
           />
           <Slider
             label="Ball size"
             value={config.ball_size->Belt.Int.toString}
             max="30"
             min="6"
-            onChange={evt => setConfig(SetBallSize(ReactEvent.Form.target(evt)["value"]))}
+            onChange={evt => setConfig(SetBallSize(ReactEvent.Form.target(evt)["value"]->Belt.Float.toInt))}
+            // onChange={evt => setConfig(SetBallSize(ReactEvent.Form.target(evt)["value"]->Belt.Int.fromString->Belt.Option.getWithDefault(16)))}
           />
         </tbody>
       </table>
