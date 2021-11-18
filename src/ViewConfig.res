@@ -1,9 +1,9 @@
 module Slider = {
   @react.component
-  let make = (~value, ~label, ~max, ~min, ~onChange) => <>
+  let make = (~value: string, ~label, ~max, ~min, ~onChange) => <>
     <tr> <td style={ReactDOMStyle.make(~paddingTop="20px", ())}> {label->React.string} </td> </tr>
     <tr>
-      <td> <input onChange type_="range" min max value /> </td> <td> {value->React.string} </td>
+      <td> <input onChange type_="range" min max value/> </td> <td> {value->React.string} </td>
     </tr>
   </>
 }
@@ -35,8 +35,7 @@ let make = (~config: Config.t, ~setConfig: Config.action => unit) => {
             max="30"
             min="6"
             onChange={evt => setConfig(SetBallSize(ReactEvent.Form.target(evt)["value"]->Belt.Float.toInt))}
-            // onChange={evt => setConfig(SetBallSize(ReactEvent.Form.target(evt)["value"]->Belt.Int.fromString->Belt.Option.getWithDefault(16)))}
-          />
+           />
         </tbody>
       </table>
     </fieldset>

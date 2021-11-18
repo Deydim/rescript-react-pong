@@ -103,8 +103,7 @@ function ViewGame(Props) {
                   }
                 }), React.createElement(Update.Tick.make, {
                   state: state,
-                  dispatch: dispatch,
-                  init: init
+                  dispatch: dispatch
                 }));
 }
 

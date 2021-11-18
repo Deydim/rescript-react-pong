@@ -102,6 +102,6 @@ let make = (~config: Config.t) => {
         (),
       )}
     />
-    <Update.Tick dispatch state init/>
+    <Update.Tick dispatch state />
   </>
 }

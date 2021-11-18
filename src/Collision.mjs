@@ -2,18 +2,21 @@
 
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
-function make(param, param$1) {
+function make(param) {
   var match = param.ball;
   var ballSize = match.size;
+  var playerWidth = param.playerWidth;
   var ballCenterX = match.x + ballSize / 2;
-  var limit = ballSize / 2 + param$1.playerWidth / 2;
+  var leftPlayerCenterX = playerWidth / 2;
+  var rightPlayerCenterX = param.fieldLimits.right - playerWidth / 2;
+  var limit = ballSize / 2 + playerWidth / 2;
   if (match.horizontalDirection) {
-    if (param$1.rightPlayerCenterX - ballCenterX === limit) {
+    if (rightPlayerCenterX - ballCenterX === limit) {
       return /* Right */1;
     } else {
       return ;
     }
-  } else if (ballCenterX - param$1.leftPlayerCenterX === limit) {
+  } else if (ballCenterX - leftPlayerCenterX === limit) {
     return /* Left */0;
   } else {
     return ;
@@ -65,9 +68,9 @@ var Vertical = {
   make: make$2
 };
 
-function make$3(state, init) {
+function make$3(state) {
   return [
-          Belt_Option.flatMap(make(state, init), (function (dir) {
+          Belt_Option.flatMap(make(state), (function (dir) {
                   return make$1(dir, state);
                 })),
           make$2(state)

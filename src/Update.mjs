@@ -62,13 +62,9 @@ function updateState(state, action) {
                   playerSize: state.playerSize,
                   oldTime: state.oldTime
                 };
-      
-    }
-  } else {
-    switch (action.TAG | 0) {
-      case /* UpdateConfig */0 :
-          var init = action._0;
-          var init$1 = state.ball;
+      case /* Collide */4 :
+          var param = Collision.make(state);
+          var init = state.ball;
           return {
                   rightPlayerY: state.rightPlayerY,
                   leftPlayerY: state.leftPlayerY,
@@ -77,19 +73,46 @@ function updateState(state, action) {
                   game: state.game,
                   horizontalCollision: state.horizontalCollision,
                   ball: {
-                    x: init$1.x,
-                    y: init$1.y,
-                    size: init.ballSize,
-                    speed: init$1.speed,
-                    horizontalDirection: init$1.horizontalDirection,
-                    verticalDirection: init$1.verticalDirection,
-                    vectorIndex: init$1.vectorIndex
+                    x: init.x,
+                    y: init.y,
+                    size: init.size,
+                    speed: init.speed,
+                    horizontalDirection: Belt_Option.getWithDefault(param[0], state.ball.horizontalDirection),
+                    verticalDirection: Belt_Option.getWithDefault(param[1], state.ball.verticalDirection),
+                    vectorIndex: init.vectorIndex
+                  },
+                  fieldLimits: state.fieldLimits,
+                  playerSize: state.playerSize,
+                  oldTime: state.oldTime
+                };
+      
+    }
+  } else {
+    switch (action.TAG | 0) {
+      case /* UpdateConfig */0 :
+          var init$1 = action._0;
+          var init$2 = state.ball;
+          return {
+                  rightPlayerY: state.rightPlayerY,
+                  leftPlayerY: state.leftPlayerY,
+                  playerWidth: state.playerWidth,
+                  keys: state.keys,
+                  game: state.game,
+                  horizontalCollision: state.horizontalCollision,
+                  ball: {
+                    x: init$2.x,
+                    y: init$2.y,
+                    size: init$1.ballSize,
+                    speed: init$2.speed,
+                    horizontalDirection: init$2.horizontalDirection,
+                    verticalDirection: init$2.verticalDirection,
+                    vectorIndex: init$2.vectorIndex
                   },
                   fieldLimits: {
-                    bottom: init.fieldHeight,
-                    right: init.fieldWidth
+                    bottom: init$1.fieldHeight,
+                    right: init$1.fieldWidth
                   },
-                  playerSize: init.playerSize,
+                  playerSize: init$1.playerSize,
                   oldTime: state.oldTime
                 };
       case /* KeyEvent */1 :
@@ -109,13 +132,13 @@ function updateState(state, action) {
                         oldTime: state.oldTime
                       };
             case "ArrowDown" :
-                var init$2 = state.keys;
+                var init$3 = state.keys;
                 return {
                         rightPlayerY: state.rightPlayerY,
                         leftPlayerY: state.leftPlayerY,
                         playerWidth: state.playerWidth,
                         keys: {
-                          arrowUp: init$2.arrowUp,
+                          arrowUp: init$3.arrowUp,
                           arrowDown: type_ === "keydown"
                         },
                         game: state.game,
@@ -126,14 +149,14 @@ function updateState(state, action) {
                         oldTime: state.oldTime
                       };
             case "ArrowUp" :
-                var init$3 = state.keys;
+                var init$4 = state.keys;
                 return {
                         rightPlayerY: state.rightPlayerY,
                         leftPlayerY: state.leftPlayerY,
                         playerWidth: state.playerWidth,
                         keys: {
                           arrowUp: type_ === "keydown",
-                          arrowDown: init$3.arrowDown
+                          arrowDown: init$4.arrowDown
                         },
                         game: state.game,
                         horizontalCollision: state.horizontalCollision,
@@ -147,9 +170,9 @@ function updateState(state, action) {
           }
       case /* BallMove */2 :
           var progress = action._0;
-          var param = Caml_array.get(Model.ballVectorTable, state.ball.vectorIndex);
-          var vy = param[1];
-          var vx = param[0];
+          var param$1 = Caml_array.get(Model.ballVectorTable, state.ball.vectorIndex);
+          var vy = param$1[1];
+          var vx = param$1[0];
           var match = state.ball.verticalDirection;
           var match$1 = state.ball.horizontalDirection;
           var match$2 = match ? (
@@ -169,7 +192,7 @@ function updateState(state, action) {
                   vy
                 ]
             );
-          var init$4 = state.ball;
+          var init$5 = state.ball;
           return {
                   rightPlayerY: state.rightPlayerY,
                   leftPlayerY: state.leftPlayerY,
@@ -180,40 +203,17 @@ function updateState(state, action) {
                   ball: {
                     x: Math.max(state.playerWidth, Math.min(state.ball.x + match$2[0] * state.ball.speed * progress, state.fieldLimits.right - state.ball.size - state.playerWidth)),
                     y: Math.max(10, Math.min(state.ball.y + match$2[1] * state.ball.speed * progress, state.fieldLimits.bottom - state.ball.size + 10)),
-                    size: init$4.size,
-                    speed: init$4.speed,
-                    horizontalDirection: init$4.horizontalDirection,
-                    verticalDirection: init$4.verticalDirection,
-                    vectorIndex: init$4.vectorIndex
-                  },
-                  fieldLimits: state.fieldLimits,
-                  playerSize: state.playerSize,
-                  oldTime: state.oldTime
-                };
-      case /* Collide */3 :
-          var param$1 = Collision.make(state, action._0);
-          var init$5 = state.ball;
-          return {
-                  rightPlayerY: state.rightPlayerY,
-                  leftPlayerY: state.leftPlayerY,
-                  playerWidth: state.playerWidth,
-                  keys: state.keys,
-                  game: state.game,
-                  horizontalCollision: state.horizontalCollision,
-                  ball: {
-                    x: init$5.x,
-                    y: init$5.y,
                     size: init$5.size,
                     speed: init$5.speed,
-                    horizontalDirection: Belt_Option.getWithDefault(param$1[0], state.ball.horizontalDirection),
-                    verticalDirection: Belt_Option.getWithDefault(param$1[1], state.ball.verticalDirection),
+                    horizontalDirection: init$5.horizontalDirection,
+                    verticalDirection: init$5.verticalDirection,
                     vectorIndex: init$5.vectorIndex
                   },
                   fieldLimits: state.fieldLimits,
                   playerSize: state.playerSize,
                   oldTime: state.oldTime
                 };
-      case /* SetFrameTime */4 :
+      case /* SetFrameTime */3 :
           return {
                   rightPlayerY: state.rightPlayerY,
                   leftPlayerY: state.leftPlayerY,
@@ -234,10 +234,9 @@ function updateState(state, action) {
 function Update$Tick(Props) {
   var state = Props.state;
   var dispatch = Props.dispatch;
-  var init = Props.init;
   var tick = function (time) {
     Curry._1(dispatch, {
-          TAG: /* SetFrameTime */4,
+          TAG: /* SetFrameTime */3,
           _0: time
         });
     var match = state.keys.arrowUp;
@@ -251,10 +250,7 @@ function Update$Tick(Props) {
     } else if (match$1) {
       Curry._1(dispatch, /* PlayerDown */1);
     }
-    Curry._1(dispatch, {
-          TAG: /* Collide */3,
-          _0: init
-        });
+    Curry._1(dispatch, /* Collide */4);
     var progress = (time - state.oldTime) / 15;
     if (progress < 2) {
       return Curry._1(dispatch, {

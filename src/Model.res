@@ -72,7 +72,7 @@ type action =
   | Pause
   | KeyEvent(eventType, key)
   | BallMove(progress)
-  | Collide(init)
+  | Collide
   | SetFrameTime (float)
 
 let keys = {arrowUp: false, arrowDown: false}

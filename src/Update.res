@@ -7,8 +7,8 @@ let updateState = (state: Model.t, action: Model.action) => {
       ...state,
       oldTime: time,
     }
-  | Collide(init: Model.init) =>
-    Collision.make(state, init)->(
+  | Collide =>
+    Collision.make(state)->(
       ((hor, vert)) => {
         ...state,
         ball: {
@@ -98,7 +98,7 @@ let updateState = (state: Model.t, action: Model.action) => {
 
 module Tick = {
   @react.component
-  let make = (~state: Model.t, ~dispatch: Model.action => unit, ~init: Model.init) => {
+  let make = (~state: Model.t, ~dispatch: Model.action => unit) => {
     let tick = time => {
       dispatch(SetFrameTime(time))
       switch (state.keys.arrowUp, state.keys.arrowDown) {
@@ -106,7 +106,7 @@ module Tick = {
       | (true, false) => dispatch(PlayerUp)
       | _ => ()
       }
-      dispatch(Collide(init))
+      dispatch(Collide)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
@@ -120,8 +120,7 @@ module Tick = {
           Js.log(state)
           None
         }
-      }
-      ->Belt.Option.map(timer => () => cancelAnimationFrame(timer))
+      }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
     }, (state.oldTime, state.game))
     React.null
   }
