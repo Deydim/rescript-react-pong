@@ -8,22 +8,16 @@ body {
 }
 .field {
   position: absolute;
-  /* left: 300px;
-  top: 50px; */
   border-top: solid green 10px;
   border-bottom: solid green 10px;
   opacity: 0.8;
 }
 .ball {
   position: absolute;
-  left: 0px;
-  top: 0px;
   background-color: green;
 }
 .player {
   position: absolute;
-  left: 0px;
-  top: 0px;
   background-color: green;
 }
 .message {
@@ -41,16 +35,6 @@ body {
   background: transparent;
   font-size: 30px;
 }
-
-/* Add interface controls */
-
-/* ul li {
-  display: flex;
-}
-
-span {
-  margin-right: 10px;
-} */
 
 fieldset {
   border: 1px solid lawngreen;
@@ -154,7 +138,7 @@ table, td {
   border-collapse: collapse;
 }
 
-button {
+/* button {
   background-color: black;
   border-color: lawngreen;
 }
@@ -190,7 +174,7 @@ button:focus {
 
 button:active {
   color:rgb(227, 255, 198);
-}
+} */
 
 .configContainer {
   position: absolute;
