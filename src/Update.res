@@ -7,7 +7,7 @@ let updateState = (state: Model.t, action: Model.action) => {
       ...state,
       oldTime: time,
     }
-  | Collide =>
+  | HandleCollisions =>
     Collision.make(state)->(
       ((hor, vert)) => {
         ...state,
@@ -106,7 +106,7 @@ module Tick = {
       | (true, false) => dispatch(PlayerUp)
       | _ => ()
       }
-      dispatch(Collide)
+      dispatch(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {

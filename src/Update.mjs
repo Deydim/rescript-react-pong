@@ -62,7 +62,7 @@ function updateState(state, action) {
                   playerSize: state.playerSize,
                   oldTime: state.oldTime
                 };
-      case /* Collide */4 :
+      case /* HandleCollisions */4 :
           var param = Collision.make(state);
           var init = state.ball;
           return {
@@ -250,7 +250,7 @@ function Update$Tick(Props) {
     } else if (match$1) {
       Curry._1(dispatch, /* PlayerDown */1);
     }
-    Curry._1(dispatch, /* Collide */4);
+    Curry._1(dispatch, /* HandleCollisions */4);
     var progress = (time - state.oldTime) / 15;
     if (progress < 2) {
       return Curry._1(dispatch, {
