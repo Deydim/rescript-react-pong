@@ -1,8 +1,6 @@
-type t = Near(Model.horizontalDirection) | Hit(Model.horizontalDirection)
-
 module Broad = {
   let make: Model.t => option<Model.horizontalDirection> = ({
-    ball: {x: ballx, horizontalDirection, size: ballSize},
+    ball: {x: ballx, horizontalDirection: dir, size: ballSize},
     playerWidth,
     fieldLimits,
   }) => {
@@ -10,7 +8,7 @@ module Broad = {
     let leftPlayerCenterX = playerWidth /. 2.
     let rightPlayerCenterX = fieldLimits.right -. playerWidth /. 2.
     let limit = ballSize /. 2. +. playerWidth /. 2.
-    switch horizontalDirection {
+    switch dir {
     | Left => ballCenterX -. leftPlayerCenterX == limit ? Some(Left) : None
     | Right => rightPlayerCenterX -. ballCenterX == limit ? Some(Right) : None
     }
@@ -32,11 +30,11 @@ module Narrow = {
 }
 module Vertical = {
   let make: Model.t => option<Model.verticalDirection> = ({
-    ball: {y: ballY, size: ballSize, verticalDirection},
+    ball: {y: ballY, size: ballSize, verticalDirection: dir},
     fieldLimits: {bottom},
   }) => {
     if ballY == 10. || ballY == bottom -. ballSize +. 10. {
-      verticalDirection == Down ? Some(Up) : Some(Down)
+      dir == Down ? Some(Up) : Some(Down)
     } else {
       None
     }

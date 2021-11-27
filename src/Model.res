@@ -44,7 +44,6 @@ type t = {
   oldTime: float,
 }
 
-
 type init = {
   offsetLeft: float,
   offsetTop: float,
@@ -73,7 +72,7 @@ type action =
   | KeyEvent(eventType, key)
   | BallMove(progress)
   | Collide
-  | SetFrameTime (float)
+  | SetFrameTime(float)
 
 let keys = {arrowUp: false, arrowDown: false}
 
@@ -91,7 +90,6 @@ let init = (config: Config.t) => {
   let rightPlayerY = (fieldHeight -. playerSize) /. 2.
   let rightPlayerX = fieldWidth -. playerWidth
   let ballSize = config.ball_size->Belt.Int.toFloat
-  // let ballSize = config.ball_size->Belt.Int.toFloat
   let ballX = (fieldWidth -. ballSize) /. 2.
   let ballY = (fieldHeight -. ballSize) /. 2.
   {
@@ -115,7 +113,17 @@ let init = (config: Config.t) => {
 
 // STATE
 
-let make = ({rightPlayerY, leftPlayerY, playerWidth, ballX, ballY, ballSize, fieldHeight, fieldWidth, playerSize}) => {
+let make = ({
+  rightPlayerY,
+  leftPlayerY,
+  playerWidth,
+  ballX,
+  ballY,
+  ballSize,
+  fieldHeight,
+  fieldWidth,
+  playerSize,
+}) => {
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
   playerSize: playerSize,
@@ -136,5 +144,5 @@ let make = ({rightPlayerY, leftPlayerY, playerWidth, ballX, ballY, ballSize, fie
     bottom: fieldHeight,
     right: fieldWidth,
   },
-  oldTime: 0.
+  oldTime: 0.,
 }

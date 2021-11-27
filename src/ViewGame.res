@@ -57,6 +57,9 @@ let make = (~config: Config.t) => {
 
   React.useEffect1( () => {
     dispatch(UpdateConfig(init))
+    dispatch(PlayerUp)
+    dispatch(PlayerDown)
+    // moves players to force update of their position within field limits
     None
   }, [config])
 
@@ -101,6 +104,7 @@ let make = (~config: Config.t) => {
         ~borderRadius=(ballSize /. 2.)->floatToPx,
         (),
       )}
+
     />
     <Update.Tick dispatch state />
   </>

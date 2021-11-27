@@ -66,6 +66,8 @@ function ViewGame(Props) {
                 TAG: /* UpdateConfig */0,
                 _0: init
               });
+          Curry._1(dispatch, /* PlayerUp */0);
+          Curry._1(dispatch, /* PlayerDown */1);
           
         }), [config]);
   return React.createElement(React.Fragment, undefined, React.createElement("div", {
