@@ -68,6 +68,10 @@ function ViewGame(Props) {
               });
           Curry._1(dispatch, /* PlayerUp */0);
           Curry._1(dispatch, /* PlayerDown */1);
+          Curry._1(dispatch, {
+                TAG: /* BallMove */2,
+                _0: 0
+              });
           
         }), [config]);
   return React.createElement(React.Fragment, undefined, React.createElement("div", {

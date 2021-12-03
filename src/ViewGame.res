@@ -59,7 +59,8 @@ let make = (~config: Config.t) => {
     dispatch(UpdateConfig(init))
     dispatch(PlayerUp)
     dispatch(PlayerDown)
-    // moves players to force update of their position within field limits
+    dispatch(BallMove(0.))
+    // moves players and ball to force update of their position within field limits
     None
   }, [config])
 

@@ -4,7 +4,7 @@ type eventType = string
 type key = string
 type game = Playing | Over | Paused
 
-type ballVectorTableIndex = [#0 | #1 | #2 | #3]
+type ballVectorTableIndex = [#0 | #1 | #2 ]
 type horizontalDirection =
   | Left
   | Right
@@ -62,7 +62,7 @@ type init = {
   ballY: float,
 }
 type progress = float
-type horizontalLimit = float
+
 type action =
   | UpdateConfig(init)
   | PlayerUp
@@ -76,7 +76,7 @@ type action =
 
 let keys = {arrowUp: false, arrowDown: false}
 
-let ballVectorTable = [(5, 0.3), (4, 1.2), (3, 2.), (0, 0.)]
+let ballVectorTable = [(5, 0.3), (4, 1.2), (3, 2.)]
 
 let init = (config: Config.t) => {
   let offsetLeft = 300.
