@@ -38,7 +38,7 @@ let terminatingLink = ApolloClient.Link.split(~test=({query}) => {
   | Some({kind, operation}) => kind === "OperationDefinition" && operation === "subscription"
   | None => false
   }
-}, ~whenTrue=wsLink, ~whenFalse=wsLink)
+}, ~whenTrue=wsLink, ~whenFalse=httpLink)
 
 let client = {
   open ApolloClient

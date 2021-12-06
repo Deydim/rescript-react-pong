@@ -23,7 +23,7 @@ var terminatingLink = ReasonMLCommunity__ApolloClient.Link.split((function (para
         } else {
           return false;
         }
-      }), wsLink, wsLink);
+      }), wsLink, httpLink);
 
 var client = ApolloClient.make(undefined, undefined, undefined, Caml_option.some(terminatingLink), ApolloClient__Cache_InMemory_InMemoryCache.make(undefined, undefined, undefined, undefined, undefined, undefined), undefined, undefined, true, undefined, ApolloClient__Core_ApolloClient.DefaultOptions.make(ApolloClient__Core_ApolloClient.DefaultMutateOptions.make(undefined, undefined, true, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultQueryOptions.make(/* NoCache */3, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultWatchQueryOptions.make(/* NoCache */4, /* All */2, undefined, undefined), undefined), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 
