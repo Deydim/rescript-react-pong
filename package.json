@@ -10,9 +10,13 @@
   },
   "dependencies": {
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "rescript-apollo-client": "^2.3.0"
   },
   "devDependencies": {
+    "@apollo/client": "3.3.21",
+    "@reasonml-community/graphql-ppx": "^1.2.2",
+    "graphql": "15.7.2",
     "@jihchi/vite-plugin-rescript": "^1.1.0",
     "@rescript/react": "^0.10.3",
     "@ryyppy/rescript-promise": "^2.1.0",

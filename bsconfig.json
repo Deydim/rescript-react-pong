@@ -16,6 +16,19 @@
   "reason": { "react-jsx": 3 },
   "bs-dependencies": [
     "@rescript/react", 
-    "@ryyppy/rescript-promise"
-  ]
+    "@ryyppy/rescript-promise",
+    "rescript-apollo-client", 
+    "@reasonml-community/graphql-ppx"
+  ],
+  "ppx-flags": ["@reasonml-community/graphql-ppx/ppx"],
+  "graphql": {
+    "apolloMode": true,
+    "extendMutation": "ApolloClient.GraphQL_PPX.ExtendMutation",
+    "extendQuery": "ApolloClient.GraphQL_PPX.ExtendQuery",
+    "extendSubscription": "ApolloClient.GraphQL_PPX.ExtendSubscription",
+    "templateTagReturnType": "ApolloClient.GraphQL_PPX.templateTagReturnType",
+    "templateTagImport": "gql",
+    "templateTagLocation": "@apollo/client",
+    "templateTagIsFunction": true
+  }
 }
