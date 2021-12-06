@@ -11,10 +11,10 @@ import * as ApolloClient__SubscriptionsTransportWs from "rescript-apollo-client/
 import * as ApolloClient__Cache_InMemory_InMemoryCache from "rescript-apollo-client/src/@apollo/client/cache/inmemory/ApolloClient__Cache_InMemory_InMemoryCache.mjs";
 
 var httpLink = ApolloClient__Link_Http_HttpLink.make((function (param) {
-        return "https://localhost:4000";
+        return "http://localhost:4000/graphql";
       }), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 
-var wsLink = ApolloClient__Link_Ws.WebSocketLink.make("ws://localhost:4000", ApolloClient__SubscriptionsTransportWs.ClientOptions.make(undefined, undefined, true, undefined, undefined, undefined, undefined, undefined), undefined, undefined);
+var wsLink = ApolloClient__Link_Ws.WebSocketLink.make("ws://localhost:4000/graphql", ApolloClient__SubscriptionsTransportWs.ClientOptions.make(undefined, undefined, true, undefined, undefined, undefined, undefined, undefined), undefined, undefined);
 
 var terminatingLink = ReasonMLCommunity__ApolloClient.Link.split((function (param) {
         var definition = ApolloClient__Utilities.getOperationDefinition(param.query);
@@ -23,9 +23,9 @@ var terminatingLink = ReasonMLCommunity__ApolloClient.Link.split((function (para
         } else {
           return false;
         }
-      }), wsLink, httpLink);
+      }), wsLink, wsLink);
 
-var client = ApolloClient.make(undefined, undefined, undefined, Caml_option.some(terminatingLink), ApolloClient__Cache_InMemory_InMemoryCache.make(undefined, undefined, undefined, undefined, undefined, undefined), undefined, undefined, true, undefined, ApolloClient__Core_ApolloClient.DefaultOptions.make(ApolloClient__Core_ApolloClient.DefaultMutateOptions.make(undefined, undefined, true, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultQueryOptions.make(/* NetworkOnly */2, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultWatchQueryOptions.make(/* NetworkOnly */3, /* All */2, undefined, undefined), undefined), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+var client = ApolloClient.make(undefined, undefined, undefined, Caml_option.some(terminatingLink), ApolloClient__Cache_InMemory_InMemoryCache.make(undefined, undefined, undefined, undefined, undefined, undefined), undefined, undefined, true, undefined, ApolloClient__Core_ApolloClient.DefaultOptions.make(ApolloClient__Core_ApolloClient.DefaultMutateOptions.make(undefined, undefined, true, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultQueryOptions.make(/* NoCache */3, /* All */2, undefined, undefined), ApolloClient__Core_ApolloClient.DefaultWatchQueryOptions.make(/* NoCache */4, /* All */2, undefined, undefined), undefined), undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 
 export {
   httpLink ,

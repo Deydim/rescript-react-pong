@@ -1,15 +1,20 @@
-module MyQuery = {let make = %graphql(`
-  { hello (name: "ok")
+module MyQuery = {
+  let make = %graphql(`{ hello (name: "OK")}`)
 }
-`)}
 
-@react.component
-let make = () => {
-//  Js.log(MyQuery.Inner.query)
-  let todosResult = MyQuery.use()
-  switch todosResult {
-  | {data: Some({hello})} => Js.log(hello)
-  | _ => Js.log("Loading...")
+module MySub = %graphql(`subscription {sub_incremented}`)
+
+
+  @react.component
+  let make = () => {
+    let (execute, result) = MyQuery.useLazy()
+    let onClick = _ => {
+      execute()
+    }
+    switch result {
+    | Executed ({loading, data: Some({hello})}) => Js.log("some data")
+    | _ =>()
+    }
+     <button onClick> {"Query me"->React.string} </button>
   }
-React.null
-}
+

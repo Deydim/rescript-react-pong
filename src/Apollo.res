@@ -9,8 +9,9 @@
 //     (),
 //   )
 // }
+
 let httpLink = ApolloClient.Link.HttpLink.make(
-  ~uri=_ => "https://localhost:4000",
+  ~uri=_ => "http://localhost:4000/graphql",
   // Auth headers
   // ~headers=Obj.magic(headers),
   (),
@@ -19,7 +20,7 @@ let httpLink = ApolloClient.Link.HttpLink.make(
 let wsLink = {
   open ApolloClient.Link.WebSocketLink
   make(
-    ~uri="ws://localhost:4000",
+    ~uri="ws://localhost:4000/graphql",
     ~options=ClientOptions.make(
       // Auth headers
       // ~connectionParams=ConnectionParams(Obj.magic({"headers": headers})),
@@ -37,7 +38,7 @@ let terminatingLink = ApolloClient.Link.split(~test=({query}) => {
   | Some({kind, operation}) => kind === "OperationDefinition" && operation === "subscription"
   | None => false
   }
-}, ~whenTrue=wsLink, ~whenFalse=httpLink)
+}, ~whenTrue=wsLink, ~whenFalse=wsLink)
 
 let client = {
   open ApolloClient
@@ -46,8 +47,8 @@ let client = {
     ~connectToDevTools=true,
     ~defaultOptions=DefaultOptions.make(
       ~mutate=DefaultMutateOptions.make(~awaitRefetchQueries=true, ~errorPolicy=All, ()),
-      ~query=DefaultQueryOptions.make(~fetchPolicy=NetworkOnly, ~errorPolicy=All, ()),
-      ~watchQuery=DefaultWatchQueryOptions.make(~fetchPolicy=NetworkOnly, ~errorPolicy=All, ()),
+      ~query=DefaultQueryOptions.make(~fetchPolicy=NoCache, ~errorPolicy=All, ()),
+      ~watchQuery=DefaultWatchQueryOptions.make(~fetchPolicy=NoCache, ~errorPolicy=All, ()),
       (),
     ),
     ~link=terminatingLink,
