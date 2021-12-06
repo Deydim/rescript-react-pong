@@ -1,5 +1,5 @@
 module MyQuery = {let make = %graphql(`
-  { hello (name: "test")
+  { hello (name: "ok")
 }
 `)}
 
@@ -7,10 +7,9 @@ module MyQuery = {let make = %graphql(`
 let make = () => {
 //  Js.log(MyQuery.Inner.query)
   let todosResult = MyQuery.use()
-  Js.log2("result:",todosResult)
-  // switch todosResult {
-  // | {data: Some({hello})} => Js.log("Success")
-  // | _ => ()a
-  // }
+  switch todosResult {
+  | {data: Some({hello})} => Js.log(hello)
+  | _ => Js.log("Loading...")
+  }
 React.null
 }

@@ -6,7 +6,7 @@ import * as ApolloClient__React_Hooks_UseQuery from "rescript-apollo-client/src/
 
 var Raw = {};
 
-var query = Client.gql(["query   {\nhello(name: \"test\")  \n}\n"]);
+var query = Client.gql(["query   {\nhello(name: \"ok\")  \n}\n"]);
 
 function parse(value) {
   var value$1 = value.hello;
@@ -94,7 +94,12 @@ function TestQuery(Props) {
         undefined,
         undefined
       ]);
-  console.log("result:", todosResult);
+  var match = todosResult.data;
+  if (match !== undefined) {
+    console.log(match.hello);
+  } else {
+    console.log("Loading...");
+  }
   return null;
 }
 
