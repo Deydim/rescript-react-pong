@@ -130,7 +130,7 @@ module Tick = {
         dispatch(BallMove(progress))
       }
     }
-    React.useEffect4(() => {
+    React.useEffect3(() => {
       switch state.game {
       | Playing => Some(requestAnimationFrame(tick))
       | _ => {
@@ -138,7 +138,7 @@ module Tick = {
           None
         }
       }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
-    }, (state.oldTime, state.game, state, tick))
+    }, (state.game, state, tick))
     React.null
   }
 }

@@ -296,7 +296,6 @@ function Update$Tick(Props) {
                         
                       }));
         }), [
-        state.oldTime,
         state.game,
         state,
         tick
