@@ -16,7 +16,7 @@ function keyEventHandler(evt, dispatch) {
         evt.preventDefault();
         if (evt.type === "keydown") {
           return Curry._1(dispatch, {
-                      TAG: /* KeyEvent */1,
+                      TAG: /* KeyEvent */2,
                       _0: evt.type,
                       _1: evt.key
                     });
@@ -31,7 +31,7 @@ function keyEventHandler(evt, dispatch) {
   }
   evt.preventDefault();
   return Curry._1(dispatch, {
-              TAG: /* KeyEvent */1,
+              TAG: /* KeyEvent */2,
               _0: evt.type,
               _1: evt.key
             });
@@ -60,20 +60,30 @@ function ViewGame(Props) {
                     document.removeEventListener("keydown");
                     
                   });
-        }), []);
+        }), [dispatch]);
   React.useEffect((function () {
           Curry._1(dispatch, {
-                TAG: /* UpdateConfig */0,
+                TAG: /* UpdateConfig */1,
                 _0: init
               });
-          Curry._1(dispatch, /* PlayerUp */0);
-          Curry._1(dispatch, /* PlayerDown */1);
           Curry._1(dispatch, {
-                TAG: /* BallMove */2,
+                TAG: /* MovePlayer */0,
+                _0: /* Up */1
+              });
+          Curry._1(dispatch, {
+                TAG: /* MovePlayer */0,
+                _0: /* Down */0
+              });
+          Curry._1(dispatch, {
+                TAG: /* BallMove */3,
                 _0: 0
               });
           
-        }), [config]);
+        }), [
+        config,
+        init,
+        dispatch
+      ]);
   return React.createElement(React.Fragment, undefined, React.createElement("div", {
                   className: "field",
                   style: {

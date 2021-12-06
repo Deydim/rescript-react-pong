@@ -2,9 +2,9 @@
 
 type eventType = string
 type key = string
-type game = Playing | Over | Paused
+type game = Playing | Paused
 
-type ballVectorTableIndex = [#0 | #1 | #2 ]
+type ballVector= Slight | Medium | Sharp 
 type horizontalDirection =
   | Left
   | Right
@@ -28,7 +28,7 @@ type ball = {
   speed: float,
   horizontalDirection: horizontalDirection,
   verticalDirection: verticalDirection,
-  vectorIndex: ballVectorTableIndex,
+  vector: ballVector,
 }
 
 type t = {
@@ -64,9 +64,8 @@ type init = {
 type progress = float
 
 type action =
+  | MovePlayer(verticalDirection)
   | UpdateConfig(init)
-  | PlayerUp
-  | PlayerDown
   | Start
   | Pause
   | KeyEvent(eventType, key)
@@ -134,10 +133,10 @@ let make = ({
   ball: {
     x: ballX,
     y: ballY,
-    speed: 0.8,
+    speed: 1.4,
     horizontalDirection: Left,
     verticalDirection: Down,
-    vectorIndex: #1,
+    vector: Slight,
     size: ballSize,
   },
   fieldLimits: {

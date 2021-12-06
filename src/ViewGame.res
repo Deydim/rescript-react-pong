@@ -44,7 +44,7 @@ let make = (~config: Config.t) => {
     Model.make(init)
   )
   
-  React.useEffect0(() => {
+  React.useEffect1(() => {
     addEventListener("keydown", evt => keyEventHandler(evt, ~dispatch))
     addEventListener("keyup", evt => keyEventHandler(evt, ~dispatch))
     Some(
@@ -53,16 +53,16 @@ let make = (~config: Config.t) => {
         removeEventListener("keydown")
       },
     )
-  })
+  },[dispatch])
 
-  React.useEffect1( () => {
+  React.useEffect3( () => {
     dispatch(UpdateConfig(init))
-    dispatch(PlayerUp)
-    dispatch(PlayerDown)
+    dispatch(MovePlayer(Up))
+    dispatch(MovePlayer(Down))
     dispatch(BallMove(0.))
     // moves players and ball to force update of their position within field limits
     None
-  }, [config])
+  }, (config, init, dispatch))
 
   <>
     <div

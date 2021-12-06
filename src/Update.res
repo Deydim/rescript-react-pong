@@ -13,8 +13,18 @@ let updateState = (state: Model.t, action: Model.action) => {
         ...state,
         ball: {
           ...state.ball,
-          horizontalDirection: hor->Belt.Option.getWithDefault(state.ball.horizontalDirection),
-          verticalDirection: vert->Belt.Option.getWithDefault(state.ball.verticalDirection),
+          horizontalDirection: hor->Belt.Option.mapWithDefault(state.ball.horizontalDirection, ((
+            newHor,
+            _,
+          )) => newHor),
+          vector: hor->Belt.Option.mapWithDefault(state.ball.vector, ((_, (newVec, _))) => newVec),
+          verticalDirection: switch vert {
+          | None =>
+            hor->Belt.Option.mapWithDefault(state.ball.verticalDirection, ((_, (_, newVert))) =>
+              newVert
+            )
+          | Some(vert) => vert
+          },
         },
       }
     )
@@ -31,21 +41,24 @@ let updateState = (state: Model.t, action: Model.action) => {
       },
       playerSize: init.playerSize,
     }
-  | PlayerUp => {
-      ...state,
-      rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
-      leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
-    }
-  | PlayerDown => {
-      ...state,
-      rightPlayerY: Js.Math.min_float(
-        state.rightPlayerY +. 5.,
-        state.fieldLimits.bottom -. state.playerSize +. 10.,
-      ),
-      leftPlayerY: Js.Math.min_float(
-        state.leftPlayerY +. 5.,
-        state.fieldLimits.bottom -. state.playerSize +. 10.,
-      ),
+  | MovePlayer(dir: Model.verticalDirection) =>
+    switch dir {
+    | Up => {
+        ...state,
+        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
+        leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
+      }
+    | Down => {
+        ...state,
+        rightPlayerY: Js.Math.min_float(
+          state.rightPlayerY +. 5.,
+          state.fieldLimits.bottom -. state.playerSize +. 10.,
+        ),
+        leftPlayerY: Js.Math.min_float(
+          state.leftPlayerY +. 5.,
+          state.fieldLimits.bottom -. state.playerSize +. 10.,
+        ),
+      }
     }
   | Start => {
       ...state,
@@ -63,7 +76,11 @@ let updateState = (state: Model.t, action: Model.action) => {
     | _ => state
     }
   | BallMove(progress) => {
-      let (deltaX, deltaY) = Model.ballVectorTable[(state.ball.vectorIndex :> int)]->(
+      let (deltaX, deltaY) = switch state.ball.vector {
+      | Slight => Model.ballVectorTable[0]
+      | Medium => Model.ballVectorTable[1]
+      | Sharp => Model.ballVectorTable[2]
+      }->(
         ((vx, vy)) =>
           switch (state.ball.verticalDirection, state.ball.horizontalDirection) {
           | (Down, Right) => (vx, vy)
@@ -102,8 +119,8 @@ module Tick = {
     let tick = time => {
       dispatch(SetFrameTime(time))
       switch (state.keys.arrowUp, state.keys.arrowDown) {
-      | (false, true) => dispatch(PlayerDown)
-      | (true, false) => dispatch(PlayerUp)
+      | (false, true) => dispatch(MovePlayer(Down))
+      | (true, false) => dispatch(MovePlayer(Up))
       | _ => ()
       }
       dispatch(HandleCollisions)
@@ -113,7 +130,7 @@ module Tick = {
         dispatch(BallMove(progress))
       }
     }
-    React.useEffect2(() => {
+    React.useEffect4(() => {
       switch state.game {
       | Playing => Some(requestAnimationFrame(tick))
       | _ => {
@@ -121,7 +138,7 @@ module Tick = {
           None
         }
       }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
-    }, (state.oldTime, state.game))
+    }, (state.oldTime, state.game, state, tick))
     React.null
   }
 }
