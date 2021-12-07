@@ -9,13 +9,13 @@ function floatToPx(number) {
   return String(number) + "px";
 }
 
-function keyEventHandler(evt, dispatch) {
+function keyEventHandler(evt, send) {
   var match = evt.key;
   switch (match) {
     case " " :
         evt.preventDefault();
         if (evt.type === "keydown") {
-          return Curry._1(dispatch, {
+          return Curry._1(send, {
                       TAG: /* KeyEvent */2,
                       _0: evt.type,
                       _1: evt.key
@@ -30,7 +30,7 @@ function keyEventHandler(evt, dispatch) {
       return ;
   }
   evt.preventDefault();
-  return Curry._1(dispatch, {
+  return Curry._1(send, {
               TAG: /* KeyEvent */2,
               _0: evt.type,
               _1: evt.key
@@ -46,35 +46,47 @@ function ViewGame(Props) {
   var offsetTop = init.offsetTop;
   var offsetLeft = init.offsetLeft;
   var match = React.useReducer(Update.updateState, Model.make(init));
-  var dispatch = match[1];
+  var send = match[1];
   var state = match[0];
   React.useEffect((function () {
           document.addEventListener("keydown", (function (evt) {
-                  return keyEventHandler(evt, dispatch);
+                  return keyEventHandler(evt, send);
                 }));
           document.addEventListener("keyup", (function (evt) {
-                  return keyEventHandler(evt, dispatch);
+                  return keyEventHandler(evt, send);
                 }));
           return (function (param) {
                     document.removeEventListener("keyup");
                     document.removeEventListener("keydown");
                     
                   });
-        }), [dispatch]);
+        }), [send]);
   React.useEffect((function () {
-          Curry._1(dispatch, {
+          Curry._1(send, {
                 TAG: /* UpdateConfig */0,
                 _0: init
               });
-          Curry._1(dispatch, {
+          Curry._1(send, {
                 TAG: /* MovePlayer */1,
-                _0: /* Up */1
+                _0: /* Up */1,
+                _1: /* LeftPlayer */1
               });
-          Curry._1(dispatch, {
+          Curry._1(send, {
                 TAG: /* MovePlayer */1,
-                _0: /* Down */0
+                _0: /* Down */0,
+                _1: /* LeftPlayer */1
               });
-          Curry._1(dispatch, {
+          Curry._1(send, {
+                TAG: /* MovePlayer */1,
+                _0: /* Up */1,
+                _1: /* RightPlayer */0
+              });
+          Curry._1(send, {
+                TAG: /* MovePlayer */1,
+                _0: /* Down */0,
+                _1: /* RightPlayer */0
+              });
+          Curry._1(send, {
                 TAG: /* BallMove */3,
                 _0: 0
               });
@@ -132,13 +144,12 @@ function ViewGame(Props) {
                     left: String(offsetLeft + init.fieldWidth / 2 - 100) + "px",
                     position: "absolute",
                     textAlign: "center",
-                    textDecoration: "overline",
-                    top: String(offsetTop + init.fieldHeight / 2 + 50) + "px",
+                    top: String(offsetTop + init.fieldHeight + 50) + "px",
                     width: "200px"
                   }
                 }, tmp), React.createElement(Update.Tick.make, {
                   state: state,
-                  dispatch: dispatch
+                  send: send
                 }));
 }
 

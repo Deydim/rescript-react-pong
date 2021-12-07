@@ -61,10 +61,10 @@ type init = {
   ballY: float,
 }
 type progress = float
-
+type player = RightPlayer | LeftPlayer
 type action =
   | UpdateConfig(init)
-  | MovePlayer(verticalDirection)
+  | MovePlayer(verticalDirection, player)
   | KeyEvent(eventType, key)
   | BallMove(progress)
   | HandleCollisions

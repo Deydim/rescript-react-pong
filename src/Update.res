@@ -42,21 +42,27 @@ let updateState = (state: Model.t, action: Model.action) => {
       },
       playerSize: init.playerSize,
     }
-  | MovePlayer(dir: Model.verticalDirection) =>
-    switch dir {
-    | Up => {
+  | MovePlayer(dir: Model.verticalDirection, player) => switch (dir, player) {
+    | (Up, LeftPlayer) => {
         ...state,
-        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
         leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
       }
-    | Down => {
+    | (Up, RightPlayer) => {
+        ...state,
+        rightPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
+      }
+
+    | (Down, LeftPlayer) => {
+        ...state,
+        leftPlayerY: Js.Math.min_float(
+          state.leftPlayerY +. 5.,
+          state.fieldLimits.bottom -. state.playerSize +. 10.,
+        ),
+      }
+    | (Down, RightPlayer) => {
         ...state,
         rightPlayerY: Js.Math.min_float(
           state.rightPlayerY +. 5.,
-          state.fieldLimits.bottom -. state.playerSize +. 10.,
-        ),
-        leftPlayerY: Js.Math.min_float(
-          state.leftPlayerY +. 5.,
           state.fieldLimits.bottom -. state.playerSize +. 10.,
         ),
       }
@@ -66,12 +72,14 @@ let updateState = (state: Model.t, action: Model.action) => {
     | "ArrowUp" => {...state, keys: {...state.keys, arrowUp: type_ == "keydown"}}
     | "ArrowDown" => {...state, keys: {...state.keys, arrowDown: type_ == "keydown"}}
     | " " => {
-      ...state, 
-      game: switch state.game { 
+        ...state,
+        game: switch state.game {
         | NotStarted
-        | Paused => Playing
+        | Paused =>
+          Playing
         | Playing => Paused
-      }}
+        },
+      }
     | _ => state
     }
   | BallMove(progress) => {
@@ -114,19 +122,19 @@ let updateState = (state: Model.t, action: Model.action) => {
 
 module Tick = {
   @react.component
-  let make = (~state: Model.t, ~dispatch: Model.action => unit) => {
+  let make = (~state: Model.t, ~send: Model.action => unit) => {
     let tick = time => {
-      dispatch(SetFrameTime(time))
+      send(SetFrameTime(time))
       switch (state.keys.arrowUp, state.keys.arrowDown) {
-      | (false, true) => dispatch(MovePlayer(Down))
-      | (true, false) => dispatch(MovePlayer(Up))
+      | (false, true) => send(MovePlayer(Down, LeftPlayer))
+      | (true, false) => send(MovePlayer(Up, LeftPlayer))
       | _ => ()
       }
-      dispatch(HandleCollisions)
+      send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
-        dispatch(BallMove(progress))
+        send(BallMove(progress))
       }
     }
     React.useEffect3(() => {
@@ -139,6 +147,5 @@ module Tick = {
       }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
     }, (state.game, state, tick))
     React.null
-    
   }
 }

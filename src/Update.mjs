@@ -66,10 +66,37 @@ function updateState(state, action) {
                 oldTime: state.oldTime
               };
     case /* MovePlayer */1 :
+        var player = action._1;
         if (action._0) {
+          if (player) {
+            return {
+                    rightPlayerY: state.rightPlayerY,
+                    leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                    playerWidth: state.playerWidth,
+                    keys: state.keys,
+                    game: state.game,
+                    ball: state.ball,
+                    fieldLimits: state.fieldLimits,
+                    playerSize: state.playerSize,
+                    oldTime: state.oldTime
+                  };
+          } else {
+            return {
+                    rightPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                    leftPlayerY: state.leftPlayerY,
+                    playerWidth: state.playerWidth,
+                    keys: state.keys,
+                    game: state.game,
+                    ball: state.ball,
+                    fieldLimits: state.fieldLimits,
+                    playerSize: state.playerSize,
+                    oldTime: state.oldTime
+                  };
+          }
+        } else if (player) {
           return {
-                  rightPlayerY: Math.max(state.rightPlayerY - 5, 10),
-                  leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                  rightPlayerY: state.rightPlayerY,
+                  leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
                   playerWidth: state.playerWidth,
                   keys: state.keys,
                   game: state.game,
@@ -81,7 +108,7 @@ function updateState(state, action) {
         } else {
           return {
                   rightPlayerY: Math.min(state.rightPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
-                  leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
+                  leftPlayerY: state.leftPlayerY,
                   playerWidth: state.playerWidth,
                   keys: state.keys,
                   game: state.game,
@@ -217,9 +244,9 @@ function updateState(state, action) {
 
 function Update$Tick(Props) {
   var state = Props.state;
-  var dispatch = Props.dispatch;
+  var send = Props.send;
   var tick = function (time) {
-    Curry._1(dispatch, {
+    Curry._1(send, {
           TAG: /* SetFrameTime */4,
           _0: time
         });
@@ -229,21 +256,23 @@ function Update$Tick(Props) {
       if (match$1) {
         
       } else {
-        Curry._1(dispatch, {
+        Curry._1(send, {
               TAG: /* MovePlayer */1,
-              _0: /* Up */1
+              _0: /* Up */1,
+              _1: /* LeftPlayer */1
             });
       }
     } else if (match$1) {
-      Curry._1(dispatch, {
+      Curry._1(send, {
             TAG: /* MovePlayer */1,
-            _0: /* Down */0
+            _0: /* Down */0,
+            _1: /* LeftPlayer */1
           });
     }
-    Curry._1(dispatch, /* HandleCollisions */0);
+    Curry._1(send, /* HandleCollisions */0);
     var progress = (time - state.oldTime) / 15;
     if (progress < 2) {
-      return Curry._1(dispatch, {
+      return Curry._1(send, {
                   TAG: /* BallMove */3,
                   _0: progress
                 });
