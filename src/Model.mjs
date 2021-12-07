@@ -56,8 +56,7 @@ function make(param) {
           leftPlayerY: param.leftPlayerY,
           playerWidth: param.playerWidth,
           keys: keys,
-          game: /* Paused */1,
-          horizontalCollision: undefined,
+          game: /* NotStarted */2,
           ball: {
             x: param.ballX,
             y: param.ballY,

@@ -16,11 +16,12 @@ let updateState = (state: Model.t, action: Model.action) => {
           horizontalDirection: hor->Belt.Option.mapWithDefault(state.ball.horizontalDirection, ((
             newHor,
             _,
+            _,
           )) => newHor),
-          vector: hor->Belt.Option.mapWithDefault(state.ball.vector, ((_, (newVec, _))) => newVec),
+          vector: hor->Belt.Option.mapWithDefault(state.ball.vector, ((_, newVec, _)) => newVec),
           verticalDirection: switch vert {
           | None =>
-            hor->Belt.Option.mapWithDefault(state.ball.verticalDirection, ((_, (_, newVert))) =>
+            hor->Belt.Option.mapWithDefault(state.ball.verticalDirection, ((_, _, newVert)) =>
               newVert
             )
           | Some(vert) => vert
@@ -60,19 +61,17 @@ let updateState = (state: Model.t, action: Model.action) => {
         ),
       }
     }
-  | Start => {
-      ...state,
-      game: Playing,
-    }
-  | Pause => {
-      ...state,
-      game: Paused,
-    }
   | KeyEvent(type_, key) =>
     switch key {
     | "ArrowUp" => {...state, keys: {...state.keys, arrowUp: type_ == "keydown"}}
     | "ArrowDown" => {...state, keys: {...state.keys, arrowDown: type_ == "keydown"}}
-    | " " => {...state, game: state.game == Paused ? Playing : Paused}
+    | " " => {
+      ...state, 
+      game: switch state.game { 
+        | NotStarted
+        | Paused => Playing
+        | Playing => Paused
+      }}
     | _ => state
     }
   | BallMove(progress) => {
@@ -140,5 +139,6 @@ module Tick = {
       }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
     }, (state.game, state, tick))
     React.null
+    
   }
 }

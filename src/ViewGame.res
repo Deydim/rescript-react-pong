@@ -55,14 +55,14 @@ let make = (~config: Config.t) => {
     )
   },[dispatch])
 
-  React.useEffect3( () => {
+  React.useEffect1( () => {
     dispatch(UpdateConfig(init))
     dispatch(MovePlayer(Up))
     dispatch(MovePlayer(Down))
     dispatch(BallMove(0.))
     // moves players and ball to force update of their position within field limits
     None
-  }, (config, init, dispatch))
+  }, [config])
 
   <>
     <div
@@ -105,8 +105,14 @@ let make = (~config: Config.t) => {
         ~borderRadius=(ballSize /. 2.)->floatToPx,
         (),
       )}
-
     />
+    <Message offsetLeft={init.offsetLeft} offsetTop={init.offsetTop} limits={state.fieldLimits}>
+    {switch state.game {
+      | Playing => {React.null} 
+      | Paused => {React.string("Paused")} 
+      | NotStarted => {React.string("Press space to play")}
+    }}
+    </Message>
     <Update.Tick dispatch state />
   </>
 }

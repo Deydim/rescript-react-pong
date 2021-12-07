@@ -1,3 +1,9 @@
+type collision = {
+  wallsVertical: option<Model.verticalDirection>,
+  playerVector: option<Model.ballVector>,
+  playerVertical: option<Model.verticalDirection>,
+}
+
 module Broad = {
   let make: Model.t => option<Model.horizontalDirection> = ({
     ball: {x: ballx, horizontalDirection: dir, size: ballSize},
@@ -77,7 +83,7 @@ module Narrow = {
     }
   }
 }
-module Vertical = {
+module Walls = {
   let make: Model.t => option<Model.verticalDirection> = ({
     ball: {y: ballY, size: ballSize, verticalDirection: dir},
     fieldLimits: {bottom},
@@ -91,9 +97,11 @@ module Vertical = {
 }
 
 let make: Model.t => (
-  option<(Model.horizontalDirection, (Model.ballVector, Model.verticalDirection))>,
+  option<(Model.horizontalDirection, Model.ballVector, Model.verticalDirection)>,
   option<Model.verticalDirection>,
 ) = state => (
-  Broad.make(state)->Belt.Option.flatMap(dir => Narrow.make(dir, state)),
-  Vertical.make(state),
+  Broad.make(state)->Belt.Option.flatMap(dir =>
+    Narrow.make(dir, state)->Belt.Option.map(((hor, (vec, vert))) => (hor, vec, vert))
+  ),
+  Walls.make(state),
 )

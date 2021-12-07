@@ -4,6 +4,7 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as React from "react";
 import * as Update from "./Update.mjs";
+import * as Message from "./Message.mjs";
 
 function floatToPx(number) {
   return String(number) + "px";
@@ -63,15 +64,15 @@ function ViewGame(Props) {
         }), [dispatch]);
   React.useEffect((function () {
           Curry._1(dispatch, {
-                TAG: /* UpdateConfig */1,
+                TAG: /* UpdateConfig */0,
                 _0: init
               });
           Curry._1(dispatch, {
-                TAG: /* MovePlayer */0,
+                TAG: /* MovePlayer */1,
                 _0: /* Up */1
               });
           Curry._1(dispatch, {
-                TAG: /* MovePlayer */0,
+                TAG: /* MovePlayer */1,
                 _0: /* Down */0
               });
           Curry._1(dispatch, {
@@ -79,11 +80,21 @@ function ViewGame(Props) {
                 _0: 0
               });
           
-        }), [
-        config,
-        init,
-        dispatch
-      ]);
+        }), [config]);
+  var match$1 = state.game;
+  var tmp;
+  switch (match$1) {
+    case /* Playing */0 :
+        tmp = null;
+        break;
+    case /* Paused */1 :
+        tmp = "Paused";
+        break;
+    case /* NotStarted */2 :
+        tmp = "Press space to play";
+        break;
+    
+  }
   return React.createElement(React.Fragment, undefined, React.createElement("div", {
                   className: "field",
                   style: {
@@ -117,6 +128,11 @@ function ViewGame(Props) {
                     width: String(ballSize) + "px",
                     borderRadius: String(ballSize / 2) + "px"
                   }
+                }), React.createElement(Message.make, {
+                  children: tmp,
+                  offsetLeft: init.offsetLeft,
+                  offsetTop: init.offsetTop,
+                  limits: state.fieldLimits
                 }), React.createElement(Update.Tick.make, {
                   state: state,
                   dispatch: dispatch

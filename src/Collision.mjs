@@ -109,14 +109,21 @@ function make$3(param) {
   
 }
 
-var Vertical = {
+var Walls = {
   make: make$3
 };
 
 function make$4(state) {
   return [
           Belt_Option.flatMap(make(state), (function (dir) {
-                  return make$2(dir, state);
+                  return Belt_Option.map(make$2(dir, state), (function (param) {
+                                var match = param[1];
+                                return [
+                                        param[0],
+                                        match[0],
+                                        match[1]
+                                      ];
+                              }));
                 })),
           make$3(state)
         ];
@@ -126,7 +133,7 @@ export {
   Broad ,
   VectorChange ,
   Narrow ,
-  Vertical ,
+  Walls ,
   make$4 as make,
   
 }

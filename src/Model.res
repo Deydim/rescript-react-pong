@@ -2,7 +2,7 @@
 
 type eventType = string
 type key = string
-type game = Playing | Paused
+type game = Playing | Paused | NotStarted
 
 type ballVector= Slight | Medium | Sharp 
 type horizontalDirection =
@@ -37,7 +37,6 @@ type t = {
   playerWidth: float,
   keys: keys,
   game: game,
-  horizontalCollision: option<horizontalDirection>,
   ball: ball,
   fieldLimits: limits,
   playerSize: float,
@@ -64,10 +63,8 @@ type init = {
 type progress = float
 
 type action =
-  | MovePlayer(verticalDirection)
   | UpdateConfig(init)
-  | Start
-  | Pause
+  | MovePlayer(verticalDirection)
   | KeyEvent(eventType, key)
   | BallMove(progress)
   | HandleCollisions
@@ -128,8 +125,7 @@ let make = ({
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,
-  game: Paused,
-  horizontalCollision: None,
+  game: NotStarted,
   ball: {
     x: ballX,
     y: ballY,
