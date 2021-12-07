@@ -4,7 +4,6 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as React from "react";
 import * as Update from "./Update.mjs";
-import * as Message from "./Message.mjs";
 
 function floatToPx(number) {
   return String(number) + "px";
@@ -128,12 +127,16 @@ function ViewGame(Props) {
                     width: String(ballSize) + "px",
                     borderRadius: String(ballSize / 2) + "px"
                   }
-                }), React.createElement(Message.make, {
-                  children: tmp,
-                  offsetLeft: init.offsetLeft,
-                  offsetTop: init.offsetTop,
-                  limits: state.fieldLimits
-                }), React.createElement(Update.Tick.make, {
+                }), React.createElement("div", {
+                  style: {
+                    left: String(offsetLeft + init.fieldWidth / 2 - 100) + "px",
+                    position: "absolute",
+                    textAlign: "center",
+                    textDecoration: "overline",
+                    top: String(offsetTop + init.fieldHeight / 2 + 50) + "px",
+                    width: "200px"
+                  }
+                }, tmp), React.createElement(Update.Tick.make, {
                   state: state,
                   dispatch: dispatch
                 }));

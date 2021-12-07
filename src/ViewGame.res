@@ -106,13 +106,23 @@ let make = (~config: Config.t) => {
         (),
       )}
     />
-    <Message offsetLeft={init.offsetLeft} offsetTop={init.offsetTop} limits={state.fieldLimits}>
+    <div style = {
+    ReactDOMStyle.make(
+      ~position = "absolute",
+      ~top = (offsetTop +. init.fieldHeight /. 2. +. 50.)->floatToPx,
+      ~left = (offsetLeft +.  init.fieldWidth /. 2. -. 100.)->floatToPx,
+      ~width = "200px",
+      ~textAlign = "center",
+      ~textDecoration= "overline",
+      ()
+    )
+  }>
     {switch state.game {
       | Playing => {React.null} 
       | Paused => {React.string("Paused")} 
       | NotStarted => {React.string("Press space to play")}
     }}
-    </Message>
+    </div>
     <Update.Tick dispatch state />
   </>
 }
