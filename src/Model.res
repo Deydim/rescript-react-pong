@@ -4,7 +4,7 @@ type eventType = string
 type key = string
 type game = Playing | Paused | NotStarted
 
-type ballVector= Slight | Medium | Sharp 
+type ballVector = Slight | Medium | Sharp
 type horizontalDirection =
   | Left
   | Right
@@ -29,6 +29,7 @@ type ball = {
   horizontalDirection: horizontalDirection,
   verticalDirection: verticalDirection,
   vector: ballVector,
+  predictedY: float,
 }
 
 type t = {
@@ -129,15 +130,25 @@ let make = ({
   ball: {
     x: ballX,
     y: ballY,
-    speed: 1.4,
+    speed: 1.5,
     horizontalDirection: Left,
     verticalDirection: Down,
-    vector: Slight,
+    vector: Sharp,
     size: ballSize,
+    predictedY: fieldHeight /. 2.,
   },
   fieldLimits: {
     bottom: fieldHeight,
     right: fieldWidth,
   },
   oldTime: 0.,
+}
+
+//Utils
+let getVector = (vec: ballVector) => {
+  switch vec {
+  | Slight => ballVectorTable[0]
+  | Medium => ballVectorTable[1]
+  | Sharp => ballVectorTable[2]
+  }
 }

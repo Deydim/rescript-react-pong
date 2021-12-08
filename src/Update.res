@@ -9,24 +9,25 @@ let updateState = (state: Model.t, action: Model.action) => {
     }
   | HandleCollisions =>
     Collision.make(state)->(
-      ((hor, vert)) => {
-        ...state,
-        ball: {
-          ...state.ball,
-          horizontalDirection: hor->Belt.Option.mapWithDefault(state.ball.horizontalDirection, ((
-            newHor,
-            _,
-            _,
-          )) => newHor),
-          vector: hor->Belt.Option.mapWithDefault(state.ball.vector, ((_, newVec, _)) => newVec),
-          verticalDirection: switch vert {
-          | None =>
-            hor->Belt.Option.mapWithDefault(state.ball.verticalDirection, ((_, _, newVert)) =>
-              newVert
-            )
-          | Some(vert) => vert
-          },
-        },
+      (collision: Collision.t) => {
+        switch collision.wallsVertical {
+        | Some(dir) => {...state, ball: {...state.ball, verticalDirection: dir}}
+        | None => 
+        {
+            ...state,
+            ball: {
+              ...state.ball,
+              horizontalDirection: collision.horizontalDirection->Belt.Option.getWithDefault(
+                state.ball.horizontalDirection,
+              ),
+              vector: collision.playerVector->Belt.Option.getWithDefault(state.ball.vector),
+              verticalDirection: collision.playerVertical->Belt.Option.getWithDefault(
+                state.ball.verticalDirection,
+              ),
+              predictedY: collision.predictedY->Belt.Option.getWithDefault(state.ball.predictedY),
+            },
+          }
+        }
       }
     )
 
@@ -42,14 +43,15 @@ let updateState = (state: Model.t, action: Model.action) => {
       },
       playerSize: init.playerSize,
     }
-  | MovePlayer(dir: Model.verticalDirection, player) => switch (dir, player) {
+  | MovePlayer(dir: Model.verticalDirection, player) =>
+    switch (dir, player) {
     | (Up, LeftPlayer) => {
         ...state,
         leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
       }
     | (Up, RightPlayer) => {
         ...state,
-        rightPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
+        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
       }
 
     | (Down, LeftPlayer) => {
@@ -83,11 +85,7 @@ let updateState = (state: Model.t, action: Model.action) => {
     | _ => state
     }
   | BallMove(progress) => {
-      let (deltaX, deltaY) = switch state.ball.vector {
-      | Slight => Model.ballVectorTable[0]
-      | Medium => Model.ballVectorTable[1]
-      | Sharp => Model.ballVectorTable[2]
-      }->(
+      let (deltaX, deltaY) = Model.getVector(state.ball.vector)->(
         ((vx, vy)) =>
           switch (state.ball.verticalDirection, state.ball.horizontalDirection) {
           | (Down, Right) => (vx, vy)
@@ -130,12 +128,29 @@ module Tick = {
       | (true, false) => send(MovePlayer(Up, LeftPlayer))
       | _ => ()
       }
+
+
+      if state.ball.horizontalDirection == Right &&
+        Js.Math.abs_float(state.ball.predictedY -.( state.rightPlayerY +. state.playerSize /. 2.)) > 4.
+      {
+        switch state.ball.predictedY > state.rightPlayerY +. state.playerSize /. 2. {
+        | true => send(MovePlayer(Down, RightPlayer))
+        | false => send(MovePlayer(Up, RightPlayer))
+        } 
+      } else if state.ball.horizontalDirection == Left &&
+        Js.Math.abs_float(state.fieldLimits.bottom /.2. -.( state.rightPlayerY +. state.playerSize /. 2.)) > 4. {
+        switch state.fieldLimits.bottom /.2. > state.rightPlayerY +. state.playerSize /. 2. {
+        | true => send(MovePlayer(Down, RightPlayer))
+        | false => send(MovePlayer(Up, RightPlayer))
+        } 
+      }
       send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
         send(BallMove(progress))
       }
+      
     }
     React.useEffect3(() => {
       switch state.game {

@@ -4,15 +4,36 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as React from "react";
 import * as Collision from "./Collision.mjs";
-import * as Caml_array from "rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function updateState(state, action) {
   if (typeof action === "number") {
-    var param = Collision.make(state);
-    var vert = param[1];
-    var hor = param[0];
-    var init = state.ball;
+    var collision = Collision.make(state);
+    var dir = collision.wallsVertical;
+    if (dir !== undefined) {
+      var init = state.ball;
+      return {
+              rightPlayerY: state.rightPlayerY,
+              leftPlayerY: state.leftPlayerY,
+              playerWidth: state.playerWidth,
+              keys: state.keys,
+              game: state.game,
+              ball: {
+                x: init.x,
+                y: init.y,
+                size: init.size,
+                speed: init.speed,
+                horizontalDirection: init.horizontalDirection,
+                verticalDirection: dir,
+                vector: init.vector,
+                predictedY: init.predictedY
+              },
+              fieldLimits: state.fieldLimits,
+              playerSize: state.playerSize,
+              oldTime: state.oldTime
+            };
+    }
+    var init$1 = state.ball;
     return {
             rightPlayerY: state.rightPlayerY,
             leftPlayerY: state.leftPlayerY,
@@ -20,19 +41,14 @@ function updateState(state, action) {
             keys: state.keys,
             game: state.game,
             ball: {
-              x: init.x,
-              y: init.y,
-              size: init.size,
-              speed: init.speed,
-              horizontalDirection: Belt_Option.mapWithDefault(hor, state.ball.horizontalDirection, (function (param) {
-                      return param[0];
-                    })),
-              verticalDirection: vert !== undefined ? vert : Belt_Option.mapWithDefault(hor, state.ball.verticalDirection, (function (param) {
-                        return param[2];
-                      })),
-              vector: Belt_Option.mapWithDefault(hor, state.ball.vector, (function (param) {
-                      return param[1];
-                    }))
+              x: init$1.x,
+              y: init$1.y,
+              size: init$1.size,
+              speed: init$1.speed,
+              horizontalDirection: Belt_Option.getWithDefault(collision.horizontalDirection, state.ball.horizontalDirection),
+              verticalDirection: Belt_Option.getWithDefault(collision.playerVertical, state.ball.verticalDirection),
+              vector: Belt_Option.getWithDefault(collision.playerVector, state.ball.vector),
+              predictedY: Belt_Option.getWithDefault(collision.predictedY, state.ball.predictedY)
             },
             fieldLimits: state.fieldLimits,
             playerSize: state.playerSize,
@@ -41,8 +57,8 @@ function updateState(state, action) {
   }
   switch (action.TAG | 0) {
     case /* UpdateConfig */0 :
-        var init$1 = action._0;
-        var init$2 = state.ball;
+        var init$2 = action._0;
+        var init$3 = state.ball;
         return {
                 rightPlayerY: state.rightPlayerY,
                 leftPlayerY: state.leftPlayerY,
@@ -50,19 +66,20 @@ function updateState(state, action) {
                 keys: state.keys,
                 game: state.game,
                 ball: {
-                  x: init$2.x,
-                  y: init$2.y,
-                  size: init$1.ballSize,
-                  speed: init$2.speed,
-                  horizontalDirection: init$2.horizontalDirection,
-                  verticalDirection: init$2.verticalDirection,
-                  vector: init$2.vector
+                  x: init$3.x,
+                  y: init$3.y,
+                  size: init$2.ballSize,
+                  speed: init$3.speed,
+                  horizontalDirection: init$3.horizontalDirection,
+                  verticalDirection: init$3.verticalDirection,
+                  vector: init$3.vector,
+                  predictedY: init$3.predictedY
                 },
                 fieldLimits: {
-                  bottom: init$1.fieldHeight,
-                  right: init$1.fieldWidth
+                  bottom: init$2.fieldHeight,
+                  right: init$2.fieldWidth
                 },
-                playerSize: init$1.playerSize,
+                playerSize: init$2.playerSize,
                 oldTime: state.oldTime
               };
     case /* MovePlayer */1 :
@@ -82,7 +99,7 @@ function updateState(state, action) {
                   };
           } else {
             return {
-                    rightPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                    rightPlayerY: Math.max(state.rightPlayerY - 5, 10),
                     leftPlayerY: state.leftPlayerY,
                     playerWidth: state.playerWidth,
                     keys: state.keys,
@@ -135,13 +152,13 @@ function updateState(state, action) {
                       oldTime: state.oldTime
                     };
           case "ArrowDown" :
-              var init$3 = state.keys;
+              var init$4 = state.keys;
               return {
                       rightPlayerY: state.rightPlayerY,
                       leftPlayerY: state.leftPlayerY,
                       playerWidth: state.playerWidth,
                       keys: {
-                        arrowUp: init$3.arrowUp,
+                        arrowUp: init$4.arrowUp,
                         arrowDown: type_ === "keydown"
                       },
                       game: state.game,
@@ -151,14 +168,14 @@ function updateState(state, action) {
                       oldTime: state.oldTime
                     };
           case "ArrowUp" :
-              var init$4 = state.keys;
+              var init$5 = state.keys;
               return {
                       rightPlayerY: state.rightPlayerY,
                       leftPlayerY: state.leftPlayerY,
                       playerWidth: state.playerWidth,
                       keys: {
                         arrowUp: type_ === "keydown",
-                        arrowDown: init$4.arrowDown
+                        arrowDown: init$5.arrowDown
                       },
                       game: state.game,
                       ball: state.ball,
@@ -171,26 +188,13 @@ function updateState(state, action) {
         }
     case /* BallMove */3 :
         var progress = action._0;
-        var match$1 = state.ball.vector;
-        var param$1;
-        switch (match$1) {
-          case /* Slight */0 :
-              param$1 = Caml_array.get(Model.ballVectorTable, 0);
-              break;
-          case /* Medium */1 :
-              param$1 = Caml_array.get(Model.ballVectorTable, 1);
-              break;
-          case /* Sharp */2 :
-              param$1 = Caml_array.get(Model.ballVectorTable, 2);
-              break;
-          
-        }
-        var vy = param$1[1];
-        var vx = param$1[0];
-        var match$2 = state.ball.verticalDirection;
-        var match$3 = state.ball.horizontalDirection;
-        var match$4 = match$2 ? (
-            match$3 ? [
+        var param = Model.getVector(state.ball.vector);
+        var vy = param[1];
+        var vx = param[0];
+        var match$1 = state.ball.verticalDirection;
+        var match$2 = state.ball.horizontalDirection;
+        var match$3 = match$1 ? (
+            match$2 ? [
                 vx,
                 -vy
               ] : [
@@ -198,7 +202,7 @@ function updateState(state, action) {
                 -vy
               ]
           ) : (
-            match$3 ? [
+            match$2 ? [
                 vx,
                 vy
               ] : [
@@ -206,7 +210,7 @@ function updateState(state, action) {
                 vy
               ]
           );
-        var init$5 = state.ball;
+        var init$6 = state.ball;
         return {
                 rightPlayerY: state.rightPlayerY,
                 leftPlayerY: state.leftPlayerY,
@@ -214,13 +218,14 @@ function updateState(state, action) {
                 keys: state.keys,
                 game: state.game,
                 ball: {
-                  x: Math.max(state.playerWidth, Math.min(state.ball.x + match$4[0] * state.ball.speed * progress, state.fieldLimits.right - state.ball.size - state.playerWidth)),
-                  y: Math.max(10, Math.min(state.ball.y + match$4[1] * state.ball.speed * progress, state.fieldLimits.bottom - state.ball.size + 10)),
-                  size: init$5.size,
-                  speed: init$5.speed,
-                  horizontalDirection: init$5.horizontalDirection,
-                  verticalDirection: init$5.verticalDirection,
-                  vector: init$5.vector
+                  x: Math.max(state.playerWidth, Math.min(state.ball.x + match$3[0] * state.ball.speed * progress, state.fieldLimits.right - state.ball.size - state.playerWidth)),
+                  y: Math.max(10, Math.min(state.ball.y + match$3[1] * state.ball.speed * progress, state.fieldLimits.bottom - state.ball.size + 10)),
+                  size: init$6.size,
+                  speed: init$6.speed,
+                  horizontalDirection: init$6.horizontalDirection,
+                  verticalDirection: init$6.verticalDirection,
+                  vector: init$6.vector,
+                  predictedY: init$6.predictedY
                 },
                 fieldLimits: state.fieldLimits,
                 playerSize: state.playerSize,
@@ -268,6 +273,35 @@ function Update$Tick(Props) {
             _0: /* Down */0,
             _1: /* LeftPlayer */1
           });
+    }
+    if (state.ball.horizontalDirection === /* Right */1 && Math.abs(state.ball.predictedY - (state.rightPlayerY + state.playerSize / 2)) > 4) {
+      if (state.ball.predictedY > state.rightPlayerY + state.playerSize / 2) {
+        Curry._1(send, {
+              TAG: /* MovePlayer */1,
+              _0: /* Down */0,
+              _1: /* RightPlayer */0
+            });
+      } else {
+        Curry._1(send, {
+              TAG: /* MovePlayer */1,
+              _0: /* Up */1,
+              _1: /* RightPlayer */0
+            });
+      }
+    } else if (state.ball.horizontalDirection === /* Left */0 && Math.abs(state.fieldLimits.bottom / 2 - (state.rightPlayerY + state.playerSize / 2)) > 4) {
+      if (state.fieldLimits.bottom / 2 > state.rightPlayerY + state.playerSize / 2) {
+        Curry._1(send, {
+              TAG: /* MovePlayer */1,
+              _0: /* Down */0,
+              _1: /* RightPlayer */0
+            });
+      } else {
+        Curry._1(send, {
+              TAG: /* MovePlayer */1,
+              _0: /* Up */1,
+              _1: /* RightPlayer */0
+            });
+      }
     }
     Curry._1(send, /* HandleCollisions */0);
     var progress = (time - state.oldTime) / 15;
