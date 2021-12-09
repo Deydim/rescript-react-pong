@@ -99,7 +99,7 @@ function updateState(state, action) {
                   };
           } else {
             return {
-                    rightPlayerY: Math.max(state.rightPlayerY - 5, 10),
+                    rightPlayerY: Math.max(state.rightPlayerY - 3, 10),
                     leftPlayerY: state.leftPlayerY,
                     playerWidth: state.playerWidth,
                     keys: state.keys,
@@ -124,7 +124,7 @@ function updateState(state, action) {
                 };
         } else {
           return {
-                  rightPlayerY: Math.min(state.rightPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
+                  rightPlayerY: Math.min(state.rightPlayerY + 3, state.fieldLimits.bottom - state.playerSize + 10),
                   leftPlayerY: state.leftPlayerY,
                   playerWidth: state.playerWidth,
                   keys: state.keys,
@@ -255,54 +255,42 @@ function Update$Tick(Props) {
           TAG: /* SetFrameTime */4,
           _0: time
         });
-    var match = state.keys.arrowUp;
-    var match$1 = state.keys.arrowDown;
-    if (match) {
-      if (match$1) {
-        
+    var ai = function (dir) {
+      var playerType = state.ball.horizontalDirection === /* Left */0 ? /* LeftPlayer */1 : /* RightPlayer */0;
+      var playerY = playerType === /* RightPlayer */0 ? state.rightPlayerY : state.leftPlayerY;
+      if (state.ball.horizontalDirection === dir && Math.abs(state.ball.predictedY - (playerY + state.playerSize / 2)) > 4) {
+        if (state.ball.predictedY > playerY + state.playerSize / 2) {
+          return Curry._1(send, {
+                      TAG: /* MovePlayer */1,
+                      _0: /* Down */0,
+                      _1: playerType
+                    });
+        } else {
+          return Curry._1(send, {
+                      TAG: /* MovePlayer */1,
+                      _0: /* Up */1,
+                      _1: playerType
+                    });
+        }
+      } else if (state.ball.horizontalDirection !== dir && Math.abs(state.fieldLimits.bottom / 2 - (state.leftPlayerY + state.playerSize / 2)) > 4) {
+        if (state.fieldLimits.bottom / 2 > state.rightPlayerY + state.playerSize / 2) {
+          return Curry._1(send, {
+                      TAG: /* MovePlayer */1,
+                      _0: /* Down */0,
+                      _1: playerType
+                    });
+        } else {
+          return Curry._1(send, {
+                      TAG: /* MovePlayer */1,
+                      _0: /* Up */1,
+                      _1: playerType
+                    });
+        }
       } else {
-        Curry._1(send, {
-              TAG: /* MovePlayer */1,
-              _0: /* Up */1,
-              _1: /* LeftPlayer */1
-            });
+        return ;
       }
-    } else if (match$1) {
-      Curry._1(send, {
-            TAG: /* MovePlayer */1,
-            _0: /* Down */0,
-            _1: /* LeftPlayer */1
-          });
-    }
-    if (state.ball.horizontalDirection === /* Right */1 && Math.abs(state.ball.predictedY - (state.rightPlayerY + state.playerSize / 2)) > 4) {
-      if (state.ball.predictedY > state.rightPlayerY + state.playerSize / 2) {
-        Curry._1(send, {
-              TAG: /* MovePlayer */1,
-              _0: /* Down */0,
-              _1: /* RightPlayer */0
-            });
-      } else {
-        Curry._1(send, {
-              TAG: /* MovePlayer */1,
-              _0: /* Up */1,
-              _1: /* RightPlayer */0
-            });
-      }
-    } else if (state.ball.horizontalDirection === /* Left */0 && Math.abs(state.fieldLimits.bottom / 2 - (state.rightPlayerY + state.playerSize / 2)) > 4) {
-      if (state.fieldLimits.bottom / 2 > state.rightPlayerY + state.playerSize / 2) {
-        Curry._1(send, {
-              TAG: /* MovePlayer */1,
-              _0: /* Down */0,
-              _1: /* RightPlayer */0
-            });
-      } else {
-        Curry._1(send, {
-              TAG: /* MovePlayer */1,
-              _0: /* Up */1,
-              _1: /* RightPlayer */0
-            });
-      }
-    }
+    };
+    ai(state.ball.horizontalDirection);
     Curry._1(send, /* HandleCollisions */0);
     var progress = (time - state.oldTime) / 15;
     if (progress < 2) {
