@@ -63,10 +63,10 @@ function make(param) {
             x: param.ballX,
             y: param.ballY,
             size: param.ballSize,
-            speed: 1.5,
+            speed: 2,
             horizontalDirection: /* Left */0,
             verticalDirection: /* Down */0,
-            vector: /* Sharp */2,
+            vector: /* Slight */0,
             predictedY: fieldHeight / 2
           },
           fieldLimits: {

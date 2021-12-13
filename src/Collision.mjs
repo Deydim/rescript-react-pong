@@ -31,7 +31,7 @@ function make(collision, param) {
     }
     
   };
-  return y + Math.round(param.playerSize / 2 * Math.random()) * (
+  return y + Math.round(param.playerSize / 2 * Math.random() - 4) * (
           Math.random() < 0.5 ? -1 : 1
         );
 }

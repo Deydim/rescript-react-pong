@@ -7,13 +7,16 @@ type t = {
 }
 
 module PredictBallHit = {
-  let make: (t, Model.t) => option<float> = (collision, {
-    ball: {x, y, size, vector}, 
-    fieldLimits: {bottom: fieldHeight, right: fieldWidth}, 
-    playerWidth,
-    playerSize,
-  }) => {
-    let (vx, vy) = Model.getVector(Belt.Option.getWithDefault(collision.playerVector, vector ))
+  let make: (t, Model.t) => option<float> = (
+    collision,
+    {
+      ball: {x, y, size, vector},
+      fieldLimits: {bottom: fieldHeight, right: fieldWidth},
+      playerWidth,
+      playerSize,
+    },
+  ) => {
+    let (vx, vy) = Model.getVector(Belt.Option.getWithDefault(collision.playerVector, vector))
     let x = ref(x)
     let y = ref(y)
     let left = ref(collision.horizontalDirection == Some(Left) ? -1. : 1.)
@@ -31,9 +34,10 @@ module PredictBallHit = {
         up.contents = -.up.contents
       }
     }
-    Some(y.contents
-    +. Js.Math.round(playerSize /. 2. *. Js.Math.random())
-    *. (Js.Math.random() < 0.5 ? -1. : 1.))
+    Some(
+      y.contents +.
+      Js.Math.round(playerSize /. 2. *. Js.Math.random() -. 4.) *. (Js.Math.random() < 0.5 ? -1. : 1.),
+    )
   }
 }
 
@@ -137,15 +141,22 @@ let make: Model.t => t = state => {
                 | Some(_) =>
                   collision
                   ->Narrow.make(state)
-                  -> collision => 
-                    switch collision.horizontalDirection {
-                    | Some (_) => 
-                      collision
+                  ->(
+                    collision =>
+                      switch collision.horizontalDirection {
+                      | Some(_) =>
+                        collision
                         ->VectorChange.make(state)
-                        ->(collision =>{...collision, predictedY: PredictBallHit.make(collision, state)}
+                        ->(
+                          collision => {
+                            ...collision,
+                            predictedY: PredictBallHit.make(collision, state),
+                          }
                         )
-                    | None => collision
-                  }
+
+                      | None => collision
+                      }
+                  )
                 | None => collision
                 }
             )

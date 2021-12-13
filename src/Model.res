@@ -130,10 +130,10 @@ let make = ({
   ball: {
     x: ballX,
     y: ballY,
-    speed: 1.5,
+    speed: 2.,
     horizontalDirection: Left,
     verticalDirection: Down,
-    vector: Sharp,
+    vector: Slight,
     size: ballSize,
     predictedY: fieldHeight /. 2.,
   },
