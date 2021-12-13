@@ -1,4 +1,3 @@
-//    TYPES
 
 type eventType = string
 type key = string
@@ -108,8 +107,6 @@ let init = (config: Config.t) => {
   }
 }
 
-// STATE
-
 let make = ({
   rightPlayerY,
   leftPlayerY,
@@ -144,7 +141,7 @@ let make = ({
   oldTime: 0.,
 }
 
-//Utils
+
 let getVector = (vec: ballVector) => {
   switch vec {
   | Slight => ballVectorTable[0]
