@@ -57,10 +57,10 @@ let make = (~config: Config.t) => {
 
   React.useEffect1( () => {
     send(UpdateConfig(init))
-    send(MovePlayer(Up, LeftPlayer))
-    send(MovePlayer(Down, LeftPlayer))
-    send(MovePlayer(Up, RightPlayer))
-    send(MovePlayer(Down, RightPlayer))
+    send(MovePlayer(Up, LeftPlayer(NPC)))
+    send(MovePlayer(Down, LeftPlayer(NPC)))
+    send(MovePlayer(Up, RightPlayer(NPC)))
+    send(MovePlayer(Down, RightPlayer(NPC)))
     send(BallMove(0.))
     // moves players and ball to force update of their position within field limits
     None

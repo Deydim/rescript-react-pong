@@ -30,10 +30,13 @@ type ball = {
   vector: ballVector,
   predictedY: float,
 }
+type control = Human | NPC
 
 type t = {
   rightPlayerY: float,
   leftPlayerY: float,
+  rightPlayerControl: control,
+  leftPlayerControl: control,
   playerWidth: float,
   keys: keys,
   game: game,
@@ -61,7 +64,7 @@ type init = {
   ballY: float,
 }
 type progress = float
-type player = RightPlayer | LeftPlayer
+type player = RightPlayer(control) | LeftPlayer(control)
 type action =
   | UpdateConfig(init)
   | MovePlayer(verticalDirection, player)
@@ -120,6 +123,8 @@ let make = ({
 }) => {
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
+  rightPlayerControl: NPC,
+  leftPlayerControl: Human,
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,

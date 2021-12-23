@@ -44,23 +44,23 @@ let updateState = (state: Model.t, action: Model.action) => {
     }
   | MovePlayer(dir: Model.verticalDirection, player) =>
     switch (dir, player) {
-    | (Up, LeftPlayer) => {
+    | (Up, LeftPlayer(_)) => {
         ...state,
         leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
       }
-    | (Up, RightPlayer) => {
+    | (Up, RightPlayer(_)) => {
         ...state,
         rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 3., 10.),
       }
 
-    | (Down, LeftPlayer) => {
+    | (Down, LeftPlayer(_)) => {
         ...state,
         leftPlayerY: Js.Math.min_float(
           state.leftPlayerY +. 5.,
           state.fieldLimits.bottom -. state.playerSize +. 10.,
         ),
       }
-    | (Down, RightPlayer) => {
+    | (Down, RightPlayer(_)) => {
         ...state,
         rightPlayerY: Js.Math.min_float(
           state.rightPlayerY +. 3.,
@@ -125,11 +125,15 @@ module Tick = {
       
       let ai = (dir: Model.horizontalDirection) => {
         let playerType: Model.player =
-          state.ball.horizontalDirection == Left ? LeftPlayer : RightPlayer
+          state.ball.horizontalDirection == Left ? LeftPlayer(state.leftPlayerControl) : RightPlayer(state.rightPlayerControl)
+        switch playerType {
+          | LeftPlayer(NPC)
+          | RightPlayer(NPC) => {
+        
         let playerTypeOpp: Model.player =
-          state.ball.horizontalDirection == Right ? LeftPlayer : RightPlayer
-        let playerY = playerType == RightPlayer ? state.rightPlayerY : state.leftPlayerY
-        let playerYOpp = playerType == LeftPlayer ? state.rightPlayerY : state.leftPlayerY
+          state.ball.horizontalDirection == Right ? LeftPlayer(state.leftPlayerControl) : RightPlayer(state.rightPlayerControl)
+        let playerY = playerType == RightPlayer(state.rightPlayerControl) ? state.rightPlayerY : state.leftPlayerY
+        let playerYOpp = playerType == LeftPlayer(state.leftPlayerControl) ? state.rightPlayerY : state.leftPlayerY
         
         if (
           state.ball.horizontalDirection == dir &&
@@ -152,12 +156,15 @@ module Tick = {
           }
         }
       }
+      | _ =>{
+      switch (state.keys.arrowUp, state.keys.arrowDown) {
+      | (false, true) => send(MovePlayer(Down, playerType))
+      | (true, false) => send(MovePlayer(Up, playerType))
+      | _ => ()
+      }}
+      
+      }}
 
-      // switch (state.keys.arrowUp, state.keys.arrowDown) {
-      // | (false, true) => send(MovePlayer(Down, LeftPlayer))
-      // | (true, false) => send(MovePlayer(Up, LeftPlayer))
-      // | _ => ()
-      // }
 
       ai(state.ball.horizontalDirection)
       send(HandleCollisions)

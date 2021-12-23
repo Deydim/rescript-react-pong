@@ -3,6 +3,7 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as React from "react";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Collision from "./Collision.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
@@ -15,6 +16,8 @@ function updateState(state, action) {
       return {
               rightPlayerY: state.rightPlayerY,
               leftPlayerY: state.leftPlayerY,
+              rightPlayerControl: state.rightPlayerControl,
+              leftPlayerControl: state.leftPlayerControl,
               playerWidth: state.playerWidth,
               keys: state.keys,
               game: state.game,
@@ -37,6 +40,8 @@ function updateState(state, action) {
     return {
             rightPlayerY: state.rightPlayerY,
             leftPlayerY: state.leftPlayerY,
+            rightPlayerControl: state.rightPlayerControl,
+            leftPlayerControl: state.leftPlayerControl,
             playerWidth: state.playerWidth,
             keys: state.keys,
             game: state.game,
@@ -62,6 +67,8 @@ function updateState(state, action) {
         return {
                 rightPlayerY: state.rightPlayerY,
                 leftPlayerY: state.leftPlayerY,
+                rightPlayerControl: state.rightPlayerControl,
+                leftPlayerControl: state.leftPlayerControl,
                 playerWidth: state.playerWidth,
                 keys: state.keys,
                 game: state.game,
@@ -85,10 +92,12 @@ function updateState(state, action) {
     case /* MovePlayer */1 :
         var player = action._1;
         if (action._0) {
-          if (player) {
+          if (player.TAG === /* RightPlayer */0) {
             return {
-                    rightPlayerY: state.rightPlayerY,
-                    leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                    rightPlayerY: Math.max(state.rightPlayerY - 3, 10),
+                    leftPlayerY: state.leftPlayerY,
+                    rightPlayerControl: state.rightPlayerControl,
+                    leftPlayerControl: state.leftPlayerControl,
                     playerWidth: state.playerWidth,
                     keys: state.keys,
                     game: state.game,
@@ -99,8 +108,10 @@ function updateState(state, action) {
                   };
           } else {
             return {
-                    rightPlayerY: Math.max(state.rightPlayerY - 3, 10),
-                    leftPlayerY: state.leftPlayerY,
+                    rightPlayerY: state.rightPlayerY,
+                    leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                    rightPlayerControl: state.rightPlayerControl,
+                    leftPlayerControl: state.leftPlayerControl,
                     playerWidth: state.playerWidth,
                     keys: state.keys,
                     game: state.game,
@@ -110,10 +121,12 @@ function updateState(state, action) {
                     oldTime: state.oldTime
                   };
           }
-        } else if (player) {
+        } else if (player.TAG === /* RightPlayer */0) {
           return {
-                  rightPlayerY: state.rightPlayerY,
-                  leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
+                  rightPlayerY: Math.min(state.rightPlayerY + 3, state.fieldLimits.bottom - state.playerSize + 10),
+                  leftPlayerY: state.leftPlayerY,
+                  rightPlayerControl: state.rightPlayerControl,
+                  leftPlayerControl: state.leftPlayerControl,
                   playerWidth: state.playerWidth,
                   keys: state.keys,
                   game: state.game,
@@ -124,8 +137,10 @@ function updateState(state, action) {
                 };
         } else {
           return {
-                  rightPlayerY: Math.min(state.rightPlayerY + 3, state.fieldLimits.bottom - state.playerSize + 10),
-                  leftPlayerY: state.leftPlayerY,
+                  rightPlayerY: state.rightPlayerY,
+                  leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
+                  rightPlayerControl: state.rightPlayerControl,
+                  leftPlayerControl: state.leftPlayerControl,
                   playerWidth: state.playerWidth,
                   keys: state.keys,
                   game: state.game,
@@ -143,6 +158,8 @@ function updateState(state, action) {
               return {
                       rightPlayerY: state.rightPlayerY,
                       leftPlayerY: state.leftPlayerY,
+                      rightPlayerControl: state.rightPlayerControl,
+                      leftPlayerControl: state.leftPlayerControl,
                       playerWidth: state.playerWidth,
                       keys: state.keys,
                       game: match !== 0 ? /* Playing */0 : /* Paused */1,
@@ -156,6 +173,8 @@ function updateState(state, action) {
               return {
                       rightPlayerY: state.rightPlayerY,
                       leftPlayerY: state.leftPlayerY,
+                      rightPlayerControl: state.rightPlayerControl,
+                      leftPlayerControl: state.leftPlayerControl,
                       playerWidth: state.playerWidth,
                       keys: {
                         arrowUp: init$4.arrowUp,
@@ -172,6 +191,8 @@ function updateState(state, action) {
               return {
                       rightPlayerY: state.rightPlayerY,
                       leftPlayerY: state.leftPlayerY,
+                      rightPlayerControl: state.rightPlayerControl,
+                      leftPlayerControl: state.leftPlayerControl,
                       playerWidth: state.playerWidth,
                       keys: {
                         arrowUp: type_ === "keydown",
@@ -214,6 +235,8 @@ function updateState(state, action) {
         return {
                 rightPlayerY: state.rightPlayerY,
                 leftPlayerY: state.leftPlayerY,
+                rightPlayerControl: state.rightPlayerControl,
+                leftPlayerControl: state.leftPlayerControl,
                 playerWidth: state.playerWidth,
                 keys: state.keys,
                 game: state.game,
@@ -235,6 +258,8 @@ function updateState(state, action) {
         return {
                 rightPlayerY: state.rightPlayerY,
                 leftPlayerY: state.leftPlayerY,
+                rightPlayerControl: state.rightPlayerControl,
+                leftPlayerControl: state.leftPlayerControl,
                 playerWidth: state.playerWidth,
                 keys: state.keys,
                 game: state.game,
@@ -256,41 +281,83 @@ function Update$Tick(Props) {
           _0: time
         });
     var ai = function (dir) {
-      var playerType = state.ball.horizontalDirection === /* Left */0 ? /* LeftPlayer */1 : /* RightPlayer */0;
-      var playerTypeOpp = state.ball.horizontalDirection === /* Right */1 ? /* LeftPlayer */1 : /* RightPlayer */0;
-      var playerY = playerType === /* RightPlayer */0 ? state.rightPlayerY : state.leftPlayerY;
-      var playerYOpp = playerType === /* LeftPlayer */1 ? state.rightPlayerY : state.leftPlayerY;
-      if (state.ball.horizontalDirection === dir && Math.abs(state.ball.predictedY - (playerY + state.playerSize / 2)) > 4) {
-        if (state.ball.predictedY > playerY + state.playerSize / 2) {
-          Curry._1(send, {
-                TAG: /* MovePlayer */1,
-                _0: /* Down */0,
-                _1: playerType
-              });
+      var playerType = state.ball.horizontalDirection === /* Left */0 ? ({
+            TAG: /* LeftPlayer */1,
+            _0: state.leftPlayerControl
+          }) : ({
+            TAG: /* RightPlayer */0,
+            _0: state.rightPlayerControl
+          });
+      if (playerType._0) {
+        var playerTypeOpp = state.ball.horizontalDirection === /* Right */1 ? ({
+              TAG: /* LeftPlayer */1,
+              _0: state.leftPlayerControl
+            }) : ({
+              TAG: /* RightPlayer */0,
+              _0: state.rightPlayerControl
+            });
+        var playerY = Caml_obj.caml_equal(playerType, {
+              TAG: /* RightPlayer */0,
+              _0: state.rightPlayerControl
+            }) ? state.rightPlayerY : state.leftPlayerY;
+        var playerYOpp = Caml_obj.caml_equal(playerType, {
+              TAG: /* LeftPlayer */1,
+              _0: state.leftPlayerControl
+            }) ? state.rightPlayerY : state.leftPlayerY;
+        if (state.ball.horizontalDirection === dir && Math.abs(state.ball.predictedY - (playerY + state.playerSize / 2)) > 4) {
+          if (state.ball.predictedY > playerY + state.playerSize / 2) {
+            Curry._1(send, {
+                  TAG: /* MovePlayer */1,
+                  _0: /* Down */0,
+                  _1: playerType
+                });
+          } else {
+            Curry._1(send, {
+                  TAG: /* MovePlayer */1,
+                  _0: /* Up */1,
+                  _1: playerType
+                });
+          }
+        }
+        if (Math.abs(state.fieldLimits.bottom / 2 - (playerYOpp + state.playerSize / 2)) > 4) {
+          if (state.fieldLimits.bottom / 2 > playerYOpp + state.playerSize / 2) {
+            return Curry._1(send, {
+                        TAG: /* MovePlayer */1,
+                        _0: /* Down */0,
+                        _1: playerTypeOpp
+                      });
+          } else {
+            return Curry._1(send, {
+                        TAG: /* MovePlayer */1,
+                        _0: /* Up */1,
+                        _1: playerTypeOpp
+                      });
+          }
         } else {
-          Curry._1(send, {
-                TAG: /* MovePlayer */1,
-                _0: /* Up */1,
-                _1: playerType
-              });
+          return ;
         }
       }
-      if (Math.abs(state.fieldLimits.bottom / 2 - (playerYOpp + state.playerSize / 2)) > 4) {
-        if (state.fieldLimits.bottom / 2 > playerYOpp + state.playerSize / 2) {
-          return Curry._1(send, {
-                      TAG: /* MovePlayer */1,
-                      _0: /* Down */0,
-                      _1: playerTypeOpp
-                    });
+      var match = state.keys.arrowUp;
+      var match$1 = state.keys.arrowDown;
+      if (match) {
+        if (match$1) {
+          return ;
         } else {
           return Curry._1(send, {
                       TAG: /* MovePlayer */1,
                       _0: /* Up */1,
-                      _1: playerTypeOpp
+                      _1: playerType
                     });
         }
+      } else if (match$1) {
+        return Curry._1(send, {
+                    TAG: /* MovePlayer */1,
+                    _0: /* Down */0,
+                    _1: playerType
+                  });
+      } else {
+        return ;
       }
-      
     };
     ai(state.ball.horizontalDirection);
     Curry._1(send, /* HandleCollisions */0);
