@@ -1,12 +1,14 @@
-FROM node:15.12.0
+FROM node:17
 
-WORKDIR /app
+WORKDIR /home/node/app
 
-COPY . .
-
-RUN chown -R node .
+COPY package.json ./
 
 RUN npm install
 
-CMD ["npm", "start"]
+COPY . .
 
+
+ENTRYPOINT ["npm"]
+CMD ["start"]
+# ENTRYPOINT ["/bin/bash", "-c"]
