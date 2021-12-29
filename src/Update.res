@@ -44,26 +44,26 @@ let updateState = (state: Model.t, action: Model.action) => {
     }
   | MovePlayer(dir: Model.verticalDirection, player) =>
     switch (dir, player) {
-    | (Up, LeftPlayer(_)) => {
+    | (Up, LeftPlayer) => {
         ...state,
         leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
       }
-    | (Up, RightPlayer(_)) => {
+    | (Up, RightPlayer) => {
         ...state,
-        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 3., 10.),
+        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
       }
 
-    | (Down, LeftPlayer(_)) => {
+    | (Down, LeftPlayer) => {
         ...state,
         leftPlayerY: Js.Math.min_float(
           state.leftPlayerY +. 5.,
           state.fieldLimits.bottom -. state.playerSize +. 10.,
         ),
       }
-    | (Down, RightPlayer(_)) => {
+    | (Down, RightPlayer) => {
         ...state,
         rightPlayerY: Js.Math.min_float(
-          state.rightPlayerY +. 3.,
+          state.rightPlayerY +. 5.,
           state.fieldLimits.bottom -. state.playerSize +. 10.,
         ),
       }
@@ -114,6 +114,7 @@ let updateState = (state: Model.t, action: Model.action) => {
         },
       }
     }
+  | None => state
   }
 }
 
@@ -122,51 +123,60 @@ module Tick = {
   let make = (~state: Model.t, ~send: Model.action => unit) => {
     let tick = time => {
       send(SetFrameTime(time))
-      
-      let ai = (dir: Model.horizontalDirection) => {
-        let playerType: Model.player =
-          state.ball.horizontalDirection == Left ? LeftPlayer(state.leftPlayerControl) : RightPlayer(state.rightPlayerControl)
-        switch playerType {
-          | LeftPlayer(NPC)
-          | RightPlayer(NPC) => {
-        
-        let playerTypeOpp: Model.player =
-          state.ball.horizontalDirection == Right ? LeftPlayer(state.leftPlayerControl) : RightPlayer(state.rightPlayerControl)
-        let playerY = playerType == RightPlayer(state.rightPlayerControl) ? state.rightPlayerY : state.leftPlayerY
-        let playerYOpp = playerType == LeftPlayer(state.leftPlayerControl) ? state.rightPlayerY : state.leftPlayerY
-        
-        if (
-          state.ball.horizontalDirection == dir &&
-            Js.Math.abs_float(state.ball.predictedY -. (playerY +. state.playerSize /. 2.)) > 4.
-        ) {
-          switch state.ball.predictedY > playerY +. state.playerSize /. 2. {
-          | true => send(MovePlayer(Down, playerType))
-          | false => send(MovePlayer(Up, playerType))
-          }
-        } 
-        
-        if (
-            Js.Math.abs_float(
-              state.fieldLimits.bottom /. 2. -. (playerYOpp +. state.playerSize /. 2.),
+
+      let movePlayer: Model.player => Model.action = player => {
+        let isActivePlayer = switch state.ball.horizontalDirection {
+        | Left => player == LeftPlayer
+        | Right => player == RightPlayer
+        }
+        let (playerControl, playerY) = switch (state.ball.horizontalDirection, isActivePlayer) {
+        | (Left, true) => (state.leftPlayerControl, state.leftPlayerY)
+        | (Left, false) => (state.rightPlayerControl, state.rightPlayerY)
+        | (Right, true) => (state.rightPlayerControl, state.rightPlayerY)
+        | (Right, false) => (state.leftPlayerControl, state.leftPlayerY)
+        }
+        switch playerControl {
+        | NPC =>
+          if (
+            isActivePlayer && Js.Math.abs_float(state.ball.predictedY -. (playerY +. state.playerSize /. 2.)) > 4.
+          ) {
+            switch state.ball.predictedY > playerY +. state.playerSize /. 2. {
+            | true => MovePlayer(Down, player)
+            | false => MovePlayer(Up, player)
+            }
+          } else if (
+            !isActivePlayer && Js.Math.abs_float(
+              state.fieldLimits.bottom /. 2. -. (playerY +. state.playerSize /. 2.),
             ) > 4.
-        ) {
-          switch state.fieldLimits.bottom /. 2. > playerYOpp +. state.playerSize /. 2. {
-          | true => send(MovePlayer(Down, playerTypeOpp))
-          | false => send(MovePlayer(Up, playerTypeOpp))
+          ) {
+            switch state.fieldLimits.bottom /. 2. > playerY +. state.playerSize /. 2. {
+            | true => MovePlayer(Down, player)
+            | false => MovePlayer(Up, player)
+            }
+          } else {
+            None
+          }
+        | Human =>
+          switch player {
+          | RightPlayer =>
+            switch (state.keys.arrowUp, state.keys.arrowDown) {
+            | (false, true) => MovePlayer(Down, RightPlayer)
+            | (true, false) => MovePlayer(Up, RightPlayer)
+            | _ => None
+            }
+
+          | LeftPlayer =>
+            switch (state.keys.arrowUp, state.keys.arrowDown) {
+            | (false, true) => MovePlayer(Down, LeftPlayer)
+            | (true, false) => MovePlayer(Up, LeftPlayer)
+            | _ => None
+            }
           }
         }
       }
-      | _ =>{
-      switch (state.keys.arrowUp, state.keys.arrowDown) {
-      | (false, true) => send(MovePlayer(Down, playerType))
-      | (true, false) => send(MovePlayer(Up, playerType))
-      | _ => ()
-      }}
-      
-      }}
 
-
-      ai(state.ball.horizontalDirection)
+      movePlayer(LeftPlayer)->send
+      movePlayer(RightPlayer)->send
       send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.

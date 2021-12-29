@@ -69,34 +69,22 @@ function ViewGame(Props) {
           Curry._1(send, {
                 TAG: /* MovePlayer */1,
                 _0: /* Up */1,
-                _1: {
-                  TAG: /* LeftPlayer */1,
-                  _0: /* NPC */1
-                }
+                _1: /* LeftPlayer */1
               });
           Curry._1(send, {
                 TAG: /* MovePlayer */1,
                 _0: /* Down */0,
-                _1: {
-                  TAG: /* LeftPlayer */1,
-                  _0: /* NPC */1
-                }
+                _1: /* LeftPlayer */1
               });
           Curry._1(send, {
                 TAG: /* MovePlayer */1,
                 _0: /* Up */1,
-                _1: {
-                  TAG: /* RightPlayer */0,
-                  _0: /* NPC */1
-                }
+                _1: /* RightPlayer */0
               });
           Curry._1(send, {
                 TAG: /* MovePlayer */1,
                 _0: /* Down */0,
-                _1: {
-                  TAG: /* RightPlayer */0,
-                  _0: /* NPC */1
-                }
+                _1: /* RightPlayer */0
               });
           Curry._1(send, {
                 TAG: /* BallMove */3,

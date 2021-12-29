@@ -64,7 +64,7 @@ type init = {
   ballY: float,
 }
 type progress = float
-type player = RightPlayer(control) | LeftPlayer(control)
+type player = RightPlayer | LeftPlayer
 type action =
   | UpdateConfig(init)
   | MovePlayer(verticalDirection, player)
@@ -72,6 +72,7 @@ type action =
   | BallMove(progress)
   | HandleCollisions
   | SetFrameTime(float)
+  | None
 
 let keys = {arrowUp: false, arrowDown: false}
 
@@ -124,7 +125,7 @@ let make = ({
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
   rightPlayerControl: Human,
-  leftPlayerControl: NPC,
+  leftPlayerControl: Human,
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,

@@ -3,12 +3,14 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Model from "./Model.mjs";
 import * as React from "react";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Collision from "./Collision.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function updateState(state, action) {
   if (typeof action === "number") {
+    if (action !== /* HandleCollisions */0) {
+      return state;
+    }
     var collision = Collision.make(state);
     var dir = collision.wallsVertical;
     if (dir !== undefined) {
@@ -59,42 +61,85 @@ function updateState(state, action) {
             playerSize: state.playerSize,
             oldTime: state.oldTime
           };
-  }
-  switch (action.TAG | 0) {
-    case /* UpdateConfig */0 :
-        var init$2 = action._0;
-        var init$3 = state.ball;
-        return {
-                rightPlayerY: state.rightPlayerY,
-                leftPlayerY: state.leftPlayerY,
-                rightPlayerControl: state.rightPlayerControl,
-                leftPlayerControl: state.leftPlayerControl,
-                playerWidth: state.playerWidth,
-                keys: state.keys,
-                game: state.game,
-                ball: {
-                  x: init$3.x,
-                  y: init$3.y,
-                  size: init$2.ballSize,
-                  speed: init$3.speed,
-                  horizontalDirection: init$3.horizontalDirection,
-                  verticalDirection: init$3.verticalDirection,
-                  vector: init$3.vector,
-                  predictedY: init$3.predictedY
-                },
-                fieldLimits: {
-                  bottom: init$2.fieldHeight,
-                  right: init$2.fieldWidth
-                },
-                playerSize: init$2.playerSize,
-                oldTime: state.oldTime
-              };
-    case /* MovePlayer */1 :
-        var player = action._1;
-        if (action._0) {
-          if (player.TAG === /* RightPlayer */0) {
+  } else {
+    switch (action.TAG | 0) {
+      case /* UpdateConfig */0 :
+          var init$2 = action._0;
+          var init$3 = state.ball;
+          return {
+                  rightPlayerY: state.rightPlayerY,
+                  leftPlayerY: state.leftPlayerY,
+                  rightPlayerControl: state.rightPlayerControl,
+                  leftPlayerControl: state.leftPlayerControl,
+                  playerWidth: state.playerWidth,
+                  keys: state.keys,
+                  game: state.game,
+                  ball: {
+                    x: init$3.x,
+                    y: init$3.y,
+                    size: init$2.ballSize,
+                    speed: init$3.speed,
+                    horizontalDirection: init$3.horizontalDirection,
+                    verticalDirection: init$3.verticalDirection,
+                    vector: init$3.vector,
+                    predictedY: init$3.predictedY
+                  },
+                  fieldLimits: {
+                    bottom: init$2.fieldHeight,
+                    right: init$2.fieldWidth
+                  },
+                  playerSize: init$2.playerSize,
+                  oldTime: state.oldTime
+                };
+      case /* MovePlayer */1 :
+          var player = action._1;
+          if (action._0) {
+            if (player) {
+              return {
+                      rightPlayerY: state.rightPlayerY,
+                      leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
+                      rightPlayerControl: state.rightPlayerControl,
+                      leftPlayerControl: state.leftPlayerControl,
+                      playerWidth: state.playerWidth,
+                      keys: state.keys,
+                      game: state.game,
+                      ball: state.ball,
+                      fieldLimits: state.fieldLimits,
+                      playerSize: state.playerSize,
+                      oldTime: state.oldTime
+                    };
+            } else {
+              return {
+                      rightPlayerY: Math.max(state.rightPlayerY - 5, 10),
+                      leftPlayerY: state.leftPlayerY,
+                      rightPlayerControl: state.rightPlayerControl,
+                      leftPlayerControl: state.leftPlayerControl,
+                      playerWidth: state.playerWidth,
+                      keys: state.keys,
+                      game: state.game,
+                      ball: state.ball,
+                      fieldLimits: state.fieldLimits,
+                      playerSize: state.playerSize,
+                      oldTime: state.oldTime
+                    };
+            }
+          } else if (player) {
             return {
-                    rightPlayerY: Math.max(state.rightPlayerY - 3, 10),
+                    rightPlayerY: state.rightPlayerY,
+                    leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
+                    rightPlayerControl: state.rightPlayerControl,
+                    leftPlayerControl: state.leftPlayerControl,
+                    playerWidth: state.playerWidth,
+                    keys: state.keys,
+                    game: state.game,
+                    ball: state.ball,
+                    fieldLimits: state.fieldLimits,
+                    playerSize: state.playerSize,
+                    oldTime: state.oldTime
+                  };
+          } else {
+            return {
+                    rightPlayerY: Math.min(state.rightPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
                     leftPlayerY: state.leftPlayerY,
                     rightPlayerControl: state.rightPlayerControl,
                     leftPlayerControl: state.leftPlayerControl,
@@ -106,24 +151,114 @@ function updateState(state, action) {
                     playerSize: state.playerSize,
                     oldTime: state.oldTime
                   };
-          } else {
-            return {
-                    rightPlayerY: state.rightPlayerY,
-                    leftPlayerY: Math.max(state.leftPlayerY - 5, 10),
-                    rightPlayerControl: state.rightPlayerControl,
-                    leftPlayerControl: state.leftPlayerControl,
-                    playerWidth: state.playerWidth,
-                    keys: state.keys,
-                    game: state.game,
-                    ball: state.ball,
-                    fieldLimits: state.fieldLimits,
-                    playerSize: state.playerSize,
-                    oldTime: state.oldTime
-                  };
           }
-        } else if (player.TAG === /* RightPlayer */0) {
+      case /* KeyEvent */2 :
+          var type_ = action._0;
+          switch (action._1) {
+            case " " :
+                var match = state.game;
+                return {
+                        rightPlayerY: state.rightPlayerY,
+                        leftPlayerY: state.leftPlayerY,
+                        rightPlayerControl: state.rightPlayerControl,
+                        leftPlayerControl: state.leftPlayerControl,
+                        playerWidth: state.playerWidth,
+                        keys: state.keys,
+                        game: match !== 0 ? /* Playing */0 : /* Paused */1,
+                        ball: state.ball,
+                        fieldLimits: state.fieldLimits,
+                        playerSize: state.playerSize,
+                        oldTime: state.oldTime
+                      };
+            case "ArrowDown" :
+                var init$4 = state.keys;
+                return {
+                        rightPlayerY: state.rightPlayerY,
+                        leftPlayerY: state.leftPlayerY,
+                        rightPlayerControl: state.rightPlayerControl,
+                        leftPlayerControl: state.leftPlayerControl,
+                        playerWidth: state.playerWidth,
+                        keys: {
+                          arrowUp: init$4.arrowUp,
+                          arrowDown: type_ === "keydown"
+                        },
+                        game: state.game,
+                        ball: state.ball,
+                        fieldLimits: state.fieldLimits,
+                        playerSize: state.playerSize,
+                        oldTime: state.oldTime
+                      };
+            case "ArrowUp" :
+                var init$5 = state.keys;
+                return {
+                        rightPlayerY: state.rightPlayerY,
+                        leftPlayerY: state.leftPlayerY,
+                        rightPlayerControl: state.rightPlayerControl,
+                        leftPlayerControl: state.leftPlayerControl,
+                        playerWidth: state.playerWidth,
+                        keys: {
+                          arrowUp: type_ === "keydown",
+                          arrowDown: init$5.arrowDown
+                        },
+                        game: state.game,
+                        ball: state.ball,
+                        fieldLimits: state.fieldLimits,
+                        playerSize: state.playerSize,
+                        oldTime: state.oldTime
+                      };
+            default:
+              return state;
+          }
+      case /* BallMove */3 :
+          var progress = action._0;
+          var param = Model.getVector(state.ball.vector);
+          var vy = param[1];
+          var vx = param[0];
+          var match$1 = state.ball.verticalDirection;
+          var match$2 = state.ball.horizontalDirection;
+          var match$3 = match$1 ? (
+              match$2 ? [
+                  vx,
+                  -vy
+                ] : [
+                  -vx | 0,
+                  -vy
+                ]
+            ) : (
+              match$2 ? [
+                  vx,
+                  vy
+                ] : [
+                  -vx | 0,
+                  vy
+                ]
+            );
+          var init$6 = state.ball;
           return {
-                  rightPlayerY: Math.min(state.rightPlayerY + 3, state.fieldLimits.bottom - state.playerSize + 10),
+                  rightPlayerY: state.rightPlayerY,
+                  leftPlayerY: state.leftPlayerY,
+                  rightPlayerControl: state.rightPlayerControl,
+                  leftPlayerControl: state.leftPlayerControl,
+                  playerWidth: state.playerWidth,
+                  keys: state.keys,
+                  game: state.game,
+                  ball: {
+                    x: Math.max(state.playerWidth, Math.min(state.ball.x + match$3[0] * state.ball.speed * progress, state.fieldLimits.right - state.ball.size - state.playerWidth)),
+                    y: Math.max(10, Math.min(state.ball.y + match$3[1] * state.ball.speed * progress, state.fieldLimits.bottom - state.ball.size + 10)),
+                    size: init$6.size,
+                    speed: init$6.speed,
+                    horizontalDirection: init$6.horizontalDirection,
+                    verticalDirection: init$6.verticalDirection,
+                    vector: init$6.vector,
+                    predictedY: init$6.predictedY
+                  },
+                  fieldLimits: state.fieldLimits,
+                  playerSize: state.playerSize,
+                  oldTime: state.oldTime
+                };
+      case /* SetFrameTime */4 :
+          return {
+                  rightPlayerY: state.rightPlayerY,
                   leftPlayerY: state.leftPlayerY,
                   rightPlayerControl: state.rightPlayerControl,
                   leftPlayerControl: state.leftPlayerControl,
@@ -133,142 +268,10 @@ function updateState(state, action) {
                   ball: state.ball,
                   fieldLimits: state.fieldLimits,
                   playerSize: state.playerSize,
-                  oldTime: state.oldTime
+                  oldTime: action._0
                 };
-        } else {
-          return {
-                  rightPlayerY: state.rightPlayerY,
-                  leftPlayerY: Math.min(state.leftPlayerY + 5, state.fieldLimits.bottom - state.playerSize + 10),
-                  rightPlayerControl: state.rightPlayerControl,
-                  leftPlayerControl: state.leftPlayerControl,
-                  playerWidth: state.playerWidth,
-                  keys: state.keys,
-                  game: state.game,
-                  ball: state.ball,
-                  fieldLimits: state.fieldLimits,
-                  playerSize: state.playerSize,
-                  oldTime: state.oldTime
-                };
-        }
-    case /* KeyEvent */2 :
-        var type_ = action._0;
-        switch (action._1) {
-          case " " :
-              var match = state.game;
-              return {
-                      rightPlayerY: state.rightPlayerY,
-                      leftPlayerY: state.leftPlayerY,
-                      rightPlayerControl: state.rightPlayerControl,
-                      leftPlayerControl: state.leftPlayerControl,
-                      playerWidth: state.playerWidth,
-                      keys: state.keys,
-                      game: match !== 0 ? /* Playing */0 : /* Paused */1,
-                      ball: state.ball,
-                      fieldLimits: state.fieldLimits,
-                      playerSize: state.playerSize,
-                      oldTime: state.oldTime
-                    };
-          case "ArrowDown" :
-              var init$4 = state.keys;
-              return {
-                      rightPlayerY: state.rightPlayerY,
-                      leftPlayerY: state.leftPlayerY,
-                      rightPlayerControl: state.rightPlayerControl,
-                      leftPlayerControl: state.leftPlayerControl,
-                      playerWidth: state.playerWidth,
-                      keys: {
-                        arrowUp: init$4.arrowUp,
-                        arrowDown: type_ === "keydown"
-                      },
-                      game: state.game,
-                      ball: state.ball,
-                      fieldLimits: state.fieldLimits,
-                      playerSize: state.playerSize,
-                      oldTime: state.oldTime
-                    };
-          case "ArrowUp" :
-              var init$5 = state.keys;
-              return {
-                      rightPlayerY: state.rightPlayerY,
-                      leftPlayerY: state.leftPlayerY,
-                      rightPlayerControl: state.rightPlayerControl,
-                      leftPlayerControl: state.leftPlayerControl,
-                      playerWidth: state.playerWidth,
-                      keys: {
-                        arrowUp: type_ === "keydown",
-                        arrowDown: init$5.arrowDown
-                      },
-                      game: state.game,
-                      ball: state.ball,
-                      fieldLimits: state.fieldLimits,
-                      playerSize: state.playerSize,
-                      oldTime: state.oldTime
-                    };
-          default:
-            return state;
-        }
-    case /* BallMove */3 :
-        var progress = action._0;
-        var param = Model.getVector(state.ball.vector);
-        var vy = param[1];
-        var vx = param[0];
-        var match$1 = state.ball.verticalDirection;
-        var match$2 = state.ball.horizontalDirection;
-        var match$3 = match$1 ? (
-            match$2 ? [
-                vx,
-                -vy
-              ] : [
-                -vx | 0,
-                -vy
-              ]
-          ) : (
-            match$2 ? [
-                vx,
-                vy
-              ] : [
-                -vx | 0,
-                vy
-              ]
-          );
-        var init$6 = state.ball;
-        return {
-                rightPlayerY: state.rightPlayerY,
-                leftPlayerY: state.leftPlayerY,
-                rightPlayerControl: state.rightPlayerControl,
-                leftPlayerControl: state.leftPlayerControl,
-                playerWidth: state.playerWidth,
-                keys: state.keys,
-                game: state.game,
-                ball: {
-                  x: Math.max(state.playerWidth, Math.min(state.ball.x + match$3[0] * state.ball.speed * progress, state.fieldLimits.right - state.ball.size - state.playerWidth)),
-                  y: Math.max(10, Math.min(state.ball.y + match$3[1] * state.ball.speed * progress, state.fieldLimits.bottom - state.ball.size + 10)),
-                  size: init$6.size,
-                  speed: init$6.speed,
-                  horizontalDirection: init$6.horizontalDirection,
-                  verticalDirection: init$6.verticalDirection,
-                  vector: init$6.vector,
-                  predictedY: init$6.predictedY
-                },
-                fieldLimits: state.fieldLimits,
-                playerSize: state.playerSize,
-                oldTime: state.oldTime
-              };
-    case /* SetFrameTime */4 :
-        return {
-                rightPlayerY: state.rightPlayerY,
-                leftPlayerY: state.leftPlayerY,
-                rightPlayerControl: state.rightPlayerControl,
-                leftPlayerControl: state.leftPlayerControl,
-                playerWidth: state.playerWidth,
-                keys: state.keys,
-                game: state.game,
-                ball: state.ball,
-                fieldLimits: state.fieldLimits,
-                playerSize: state.playerSize,
-                oldTime: action._0
-              };
-    
+      
+    }
   }
 }
 
@@ -280,86 +283,108 @@ function Update$Tick(Props) {
           TAG: /* SetFrameTime */4,
           _0: time
         });
-    var ai = function (dir) {
-      var playerType = state.ball.horizontalDirection === /* Left */0 ? ({
-            TAG: /* LeftPlayer */1,
-            _0: state.leftPlayerControl
-          }) : ({
-            TAG: /* RightPlayer */0,
-            _0: state.rightPlayerControl
-          });
-      if (playerType._0) {
-        var playerTypeOpp = state.ball.horizontalDirection === /* Right */1 ? ({
-              TAG: /* LeftPlayer */1,
-              _0: state.leftPlayerControl
-            }) : ({
-              TAG: /* RightPlayer */0,
-              _0: state.rightPlayerControl
-            });
-        var playerY = Caml_obj.caml_equal(playerType, {
-              TAG: /* RightPlayer */0,
-              _0: state.rightPlayerControl
-            }) ? state.rightPlayerY : state.leftPlayerY;
-        var playerYOpp = Caml_obj.caml_equal(playerType, {
-              TAG: /* LeftPlayer */1,
-              _0: state.leftPlayerControl
-            }) ? state.rightPlayerY : state.leftPlayerY;
-        if (state.ball.horizontalDirection === dir && Math.abs(state.ball.predictedY - (playerY + state.playerSize / 2)) > 4) {
+    var movePlayer = function (player) {
+      var match = state.ball.horizontalDirection;
+      var isActivePlayer = match ? player === /* RightPlayer */0 : player === /* LeftPlayer */1;
+      var match$1 = state.ball.horizontalDirection;
+      var match$2 = match$1 ? (
+          isActivePlayer ? [
+              state.rightPlayerControl,
+              state.rightPlayerY
+            ] : [
+              state.leftPlayerControl,
+              state.leftPlayerY
+            ]
+        ) : (
+          isActivePlayer ? [
+              state.leftPlayerControl,
+              state.leftPlayerY
+            ] : [
+              state.rightPlayerControl,
+              state.rightPlayerY
+            ]
+        );
+      var playerY = match$2[1];
+      if (match$2[0]) {
+        if (isActivePlayer && Math.abs(state.ball.predictedY - (playerY + state.playerSize / 2)) > 4) {
           if (state.ball.predictedY > playerY + state.playerSize / 2) {
-            Curry._1(send, {
-                  TAG: /* MovePlayer */1,
-                  _0: /* Down */0,
-                  _1: playerType
-                });
-          } else {
-            Curry._1(send, {
-                  TAG: /* MovePlayer */1,
-                  _0: /* Up */1,
-                  _1: playerType
-                });
-          }
-        }
-        if (Math.abs(state.fieldLimits.bottom / 2 - (playerYOpp + state.playerSize / 2)) > 4) {
-          if (state.fieldLimits.bottom / 2 > playerYOpp + state.playerSize / 2) {
-            return Curry._1(send, {
-                        TAG: /* MovePlayer */1,
-                        _0: /* Down */0,
-                        _1: playerTypeOpp
-                      });
-          } else {
-            return Curry._1(send, {
-                        TAG: /* MovePlayer */1,
-                        _0: /* Up */1,
-                        _1: playerTypeOpp
-                      });
-          }
-        } else {
-          return ;
-        }
-      }
-      var match = state.keys.arrowUp;
-      var match$1 = state.keys.arrowDown;
-      if (match) {
-        if (match$1) {
-          return ;
-        } else {
-          return Curry._1(send, {
-                      TAG: /* MovePlayer */1,
-                      _0: /* Up */1,
-                      _1: playerType
-                    });
-        }
-      } else if (match$1) {
-        return Curry._1(send, {
+            return {
                     TAG: /* MovePlayer */1,
                     _0: /* Down */0,
-                    _1: playerType
-                  });
+                    _1: player
+                  };
+          } else {
+            return {
+                    TAG: /* MovePlayer */1,
+                    _0: /* Up */1,
+                    _1: player
+                  };
+          }
+        } else if (!isActivePlayer && Math.abs(state.fieldLimits.bottom / 2 - (playerY + state.playerSize / 2)) > 4) {
+          if (state.fieldLimits.bottom / 2 > playerY + state.playerSize / 2) {
+            return {
+                    TAG: /* MovePlayer */1,
+                    _0: /* Down */0,
+                    _1: player
+                  };
+          } else {
+            return {
+                    TAG: /* MovePlayer */1,
+                    _0: /* Up */1,
+                    _1: player
+                  };
+          }
+        } else {
+          return /* None */1;
+        }
+      }
+      if (player) {
+        var match$3 = state.keys.arrowUp;
+        var match$4 = state.keys.arrowDown;
+        if (match$3) {
+          if (match$4) {
+            return /* None */1;
+          } else {
+            return {
+                    TAG: /* MovePlayer */1,
+                    _0: /* Up */1,
+                    _1: /* LeftPlayer */1
+                  };
+          }
+        } else if (match$4) {
+          return {
+                  TAG: /* MovePlayer */1,
+                  _0: /* Down */0,
+                  _1: /* LeftPlayer */1
+                };
+        } else {
+          return /* None */1;
+        }
+      }
+      var match$5 = state.keys.arrowUp;
+      var match$6 = state.keys.arrowDown;
+      if (match$5) {
+        if (match$6) {
+          return /* None */1;
+        } else {
+          return {
+                  TAG: /* MovePlayer */1,
+                  _0: /* Up */1,
+                  _1: /* RightPlayer */0
+                };
+        }
+      } else if (match$6) {
+        return {
+                TAG: /* MovePlayer */1,
+                _0: /* Down */0,
+                _1: /* RightPlayer */0
+              };
       } else {
-        return ;
+        return /* None */1;
       }
     };
-    ai(state.ball.horizontalDirection);
+    Curry._1(send, movePlayer(/* LeftPlayer */1));
+    Curry._1(send, movePlayer(/* RightPlayer */0));
     Curry._1(send, /* HandleCollisions */0);
     var progress = (time - state.oldTime) / 15;
     if (progress < 2) {

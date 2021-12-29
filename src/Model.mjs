@@ -57,7 +57,7 @@ function make(param) {
           rightPlayerY: param.rightPlayerY,
           leftPlayerY: param.leftPlayerY,
           rightPlayerControl: /* Human */0,
-          leftPlayerControl: /* NPC */1,
+          leftPlayerControl: /* Human */0,
           playerWidth: param.playerWidth,
           keys: keys,
           game: /* NotStarted */2,
