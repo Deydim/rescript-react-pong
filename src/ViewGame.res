@@ -121,7 +121,7 @@ let make = (~config: Config.t) => {
     {switch state.game {
       | Playing => {React.null} 
       | Paused => {React.string("Paused")} 
-      | NotStarted => {React.string("Press space to play")}
+      | NotStarted => {React.string("Press space to play.")}
     }}
     </div>
     <Update.Tick send state />

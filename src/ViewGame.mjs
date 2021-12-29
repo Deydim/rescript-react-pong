@@ -114,7 +114,7 @@ function ViewGame(Props) {
         tmp = "Paused";
         break;
     case /* NotStarted */2 :
-        tmp = "Press space to play";
+        tmp = "Press space to play.";
         break;
     
   }

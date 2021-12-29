@@ -123,8 +123,8 @@ let make = ({
 }) => {
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
-  rightPlayerControl: NPC,
-  leftPlayerControl: Human,
+  rightPlayerControl: Human,
+  leftPlayerControl: NPC,
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,
