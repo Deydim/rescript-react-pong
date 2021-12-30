@@ -12,11 +12,16 @@ let updateState = (state: Model.t, action: Model.action) => {
       (collision: Collision.t) => {
         switch collision.wallsVertical {
         | Some(dir) => {...state, ball: {...state.ball, verticalDirection: dir}}
-        | None => {
+        | None =>
+         {
             ...state,
             ball: {
               ...state.ball,
-              horizontalDirection: collision.horizontalDirection->Belt.Option.getWithDefault(
+              isOut: switch (collision.broad, collision.playerVector) {
+                | (Some(_), None) => true
+                | _ => false
+              },
+              horizontalDirection: collision.narrow->Belt.Option.getWithDefault(
                 state.ball.horizontalDirection,
               ),
               vector: collision.playerVector->Belt.Option.getWithDefault(state.ball.vector),
@@ -41,6 +46,8 @@ let updateState = (state: Model.t, action: Model.action) => {
         size: init.ballSize,
       },
       playerSize: init.playerSize,
+      leftPlayerControl: init.leftPlayerControl,
+      rightPlayerControl: init.rightPlayerControl,
     }
   | MovePlayer(dir: Model.verticalDirection, player) =>
     switch (dir, player) {
@@ -72,6 +79,8 @@ let updateState = (state: Model.t, action: Model.action) => {
     switch key {
     | "ArrowUp" => {...state, keys: {...state.keys, arrowUp: type_ == "keydown"}}
     | "ArrowDown" => {...state, keys: {...state.keys, arrowDown: type_ == "keydown"}}
+    | "a" => {...state, keys: {...state.keys, keyA: type_ == "keydown"}}
+    | "z" => {...state, keys: {...state.keys, keyZ: type_ == "keydown"}}
     | " " => {
         ...state,
         game: switch state.game {
@@ -138,14 +147,16 @@ module Tick = {
         switch playerControl {
         | NPC =>
           if (
-            isActivePlayer && Js.Math.abs_float(state.ball.predictedY -. (playerY +. state.playerSize /. 2.)) > 4.
+            isActivePlayer &&
+            Js.Math.abs_float(state.ball.predictedY -. (playerY +. state.playerSize /. 2.)) > 4.
           ) {
             switch state.ball.predictedY > playerY +. state.playerSize /. 2. {
             | true => MovePlayer(Down, player)
             | false => MovePlayer(Up, player)
             }
           } else if (
-            !isActivePlayer && Js.Math.abs_float(
+            !isActivePlayer &&
+            Js.Math.abs_float(
               state.fieldLimits.bottom /. 2. -. (playerY +. state.playerSize /. 2.),
             ) > 4.
           ) {
@@ -166,7 +177,7 @@ module Tick = {
             }
 
           | LeftPlayer =>
-            switch (state.keys.arrowUp, state.keys.arrowDown) {
+            switch (state.keys.keyA, state.keys.keyZ) {
             | (false, true) => MovePlayer(Down, LeftPlayer)
             | (true, false) => MovePlayer(Up, LeftPlayer)
             | _ => None
@@ -181,7 +192,7 @@ module Tick = {
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
-        send(BallMove(progress))
+       send(BallMove(progress))
       }
     }
     React.useEffect3(() => {

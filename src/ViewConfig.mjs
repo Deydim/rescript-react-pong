@@ -11,7 +11,8 @@ function ViewConfig$Slider(Props) {
   var onChange = Props.onChange;
   return React.createElement(React.Fragment, undefined, React.createElement("tr", undefined, React.createElement("td", {
                       style: {
-                        paddingTop: "20px"
+                        paddingTop: "20px",
+                        width: "100%"
                       }
                     }, label)), React.createElement("tr", undefined, React.createElement("td", undefined, React.createElement("input", {
                           max: max,
@@ -24,6 +25,33 @@ function ViewConfig$Slider(Props) {
 
 var Slider = {
   make: ViewConfig$Slider
+};
+
+function ViewConfig$Switch(Props) {
+  var defaultChecked = Props.defaultChecked;
+  var label = Props.label;
+  var onChange = Props.onChange;
+  return React.createElement(React.Fragment, undefined, React.createElement("tr", undefined, React.createElement("td", {
+                      style: {
+                        paddingTop: "20px",
+                        textAlign: "center"
+                      },
+                      span: 2
+                    }, label)), React.createElement("tr", undefined, React.createElement("td", {
+                      span: 2
+                    }, "Human", React.createElement("label", {
+                          className: "switch"
+                        }, React.createElement("input", {
+                              defaultChecked: defaultChecked,
+                              type: "checkbox",
+                              onChange: onChange
+                            }), React.createElement("span", {
+                              className: "slider round"
+                            })), "NPC")));
+}
+
+var Switch = {
+  make: ViewConfig$Switch
 };
 
 function ViewConfig(Props) {
@@ -64,6 +92,18 @@ function ViewConfig(Props) {
                                               _0: evt.target.value | 0
                                             });
                                 })
+                            }), React.createElement(ViewConfig$Switch, {
+                              defaultChecked: true,
+                              label: "Left",
+                              onChange: (function (evt) {
+                                  return Curry._1(setConfig, /* ToggleLeftPlayerControl */1);
+                                })
+                            }), React.createElement(ViewConfig$Switch, {
+                              defaultChecked: false,
+                              label: "Right",
+                              onChange: (function (evt) {
+                                  return Curry._1(setConfig, /* ToggleRightPlayerControl */0);
+                                })
                             })))));
 }
 
@@ -71,6 +111,7 @@ var make = ViewConfig;
 
 export {
   Slider ,
+  Switch ,
   make ,
   
 }

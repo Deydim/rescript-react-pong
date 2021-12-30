@@ -25,6 +25,8 @@ function keyEventHandler(evt, send) {
         }
     case "ArrowDown" :
     case "ArrowUp" :
+    case "a" :
+    case "z" :
         break;
     default:
       return ;
@@ -99,10 +101,10 @@ function ViewGame(Props) {
         tmp = null;
         break;
     case /* Paused */1 :
-        tmp = "Paused";
+        tmp = "Paused. Press space to resume.";
         break;
     case /* NotStarted */2 :
-        tmp = "Press space to play.";
+        tmp = "Press space to start.";
         break;
     
   }
@@ -131,7 +133,7 @@ function ViewGame(Props) {
                     width: String(playerWidth) + "px"
                   }
                 }), React.createElement("div", {
-                  className: "ball",
+                  className: state.ball.isOut ? "ball-out" : "ball-in",
                   style: {
                     height: String(ballSize) + "px",
                     left: String(state.ball.x + offsetLeft) + "px",
@@ -141,11 +143,11 @@ function ViewGame(Props) {
                   }
                 }), React.createElement("div", {
                   style: {
-                    left: String(offsetLeft + init.fieldWidth / 2 - 100) + "px",
+                    left: String(offsetLeft + init.fieldWidth / 2 - 150) + "px",
                     position: "absolute",
                     textAlign: "center",
                     top: String(offsetTop + init.fieldHeight + 50) + "px",
-                    width: "200px"
+                    width: "300px"
                   }
                 }, tmp), React.createElement(Update.Tick.make, {
                   state: state,

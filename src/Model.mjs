@@ -4,7 +4,9 @@ import * as Caml_array from "rescript/lib/es6/caml_array.js";
 
 var keys = {
   arrowUp: false,
-  arrowDown: false
+  arrowDown: false,
+  keyA: false,
+  keyZ: false
 };
 
 var ballVectorTable = [
@@ -32,6 +34,8 @@ function init(config) {
   var ballSize = config.ball_size;
   var ballX = (fieldWidth - ballSize) / 2;
   var ballY = (fieldHeight - ballSize) / 2;
+  var leftPlayerControl = config.left_player_control;
+  var rightPlayerControl = config.right_player_control;
   return {
           offsetLeft: 300,
           offsetTop: 50,
@@ -47,7 +51,9 @@ function init(config) {
           rightPlayerCenterX: rightPlayerX + 14 / 2,
           ballSize: ballSize,
           ballX: ballX,
-          ballY: ballY
+          ballY: ballY,
+          leftPlayerControl: leftPlayerControl,
+          rightPlayerControl: rightPlayerControl
         };
 }
 
@@ -56,12 +62,13 @@ function make(param) {
   return {
           rightPlayerY: param.rightPlayerY,
           leftPlayerY: param.leftPlayerY,
-          rightPlayerControl: /* Human */0,
-          leftPlayerControl: /* Human */0,
+          rightPlayerControl: param.rightPlayerControl,
+          leftPlayerControl: param.leftPlayerControl,
           playerWidth: param.playerWidth,
           keys: keys,
           game: /* NotStarted */2,
           ball: {
+            isOut: false,
             x: param.ballX,
             y: param.ballY,
             size: param.ballSize,

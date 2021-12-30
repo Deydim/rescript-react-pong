@@ -16,7 +16,7 @@ function make(collision, param) {
   var vx = match$2[0];
   var x = match$1.x;
   var y = match$1.y;
-  var left = Caml_obj.caml_equal(collision.horizontalDirection, /* Left */0) ? -1 : 1;
+  var left = Caml_obj.caml_equal(collision.narrow, /* Left */0) ? -1 : 1;
   var up = Caml_obj.caml_equal(collision.playerVertical, /* Up */1) ? -1 : 1;
   while(x >= playerWidth && x < fieldWidth - playerWidth) {
     x = x + vx * left;
@@ -31,9 +31,16 @@ function make(collision, param) {
     }
     
   };
-  return y + Math.round(param.playerSize / 2 * Math.random() - 4) * (
-          Math.random() < 0.5 ? -1 : 1
-        );
+  return {
+          narrow: collision.narrow,
+          broad: collision.broad,
+          wallsVertical: collision.wallsVertical,
+          playerVector: collision.playerVector,
+          playerVertical: collision.playerVertical,
+          predictedY: y + Math.round(param.playerSize / 2 * Math.random() - 4) * (
+            Math.random() < 0.5 ? -1 : 1
+          )
+        };
 }
 
 var PredictBallHit = {
@@ -50,7 +57,8 @@ function make$1(collision, param) {
   var limit = ballSize / 2 + playerWidth / 2;
   if (match.horizontalDirection) {
     return {
-            horizontalDirection: rightPlayerCenterX - ballCenterX === limit ? /* Right */1 : undefined,
+            narrow: collision.narrow,
+            broad: rightPlayerCenterX - ballCenterX === limit ? /* Right */1 : undefined,
             wallsVertical: collision.wallsVertical,
             playerVector: collision.playerVector,
             playerVertical: collision.playerVertical,
@@ -58,7 +66,8 @@ function make$1(collision, param) {
           };
   } else {
     return {
-            horizontalDirection: ballCenterX - leftPlayerCenterX === limit ? /* Left */0 : undefined,
+            narrow: collision.narrow,
+            broad: ballCenterX - leftPlayerCenterX === limit ? /* Left */0 : undefined,
             wallsVertical: collision.wallsVertical,
             playerVector: collision.playerVector,
             playerVertical: collision.playerVertical,
@@ -78,7 +87,8 @@ function make$2(collision, state) {
   var hit = (ballCenter - playerCenter) / state.playerSize / 3 * 10;
   var match = Math.round(Math.abs(hit));
   return {
-          horizontalDirection: collision.horizontalDirection,
+          narrow: collision.narrow,
+          broad: collision.broad,
           wallsVertical: collision.wallsVertical,
           playerVector: match !== 0 ? (
               match !== 1 ? (
@@ -105,15 +115,16 @@ function make$3(collision, state) {
   var ballY = match.y;
   var leftPlayerY = state.leftPlayerY;
   var rightPlayerY = state.rightPlayerY;
-  var match$1 = collision.horizontalDirection;
+  var match$1 = collision.broad;
   return {
-          horizontalDirection: match$1 !== undefined ? (
+          narrow: match$1 !== undefined ? (
               match$1 ? (
                   ballY + ballSize > rightPlayerY && ballY < rightPlayerY + playerSize ? /* Left */0 : undefined
                 ) : (
                   ballY + ballSize > leftPlayerY && ballY < leftPlayerY + playerSize ? /* Right */1 : undefined
                 )
             ) : undefined,
+          broad: collision.broad,
           wallsVertical: collision.wallsVertical,
           playerVector: collision.playerVector,
           playerVertical: collision.playerVertical,
@@ -125,17 +136,21 @@ var Narrow = {
   make: make$3
 };
 
-function make$4(param) {
+function make$4(collision, param) {
   var match = param.ball;
   var ballY = match.y;
   if (ballY === 10 || ballY === param.fieldLimits.bottom - match.size + 10) {
-    if (match.verticalDirection === /* Down */0) {
-      return /* Up */1;
-    } else {
-      return /* Down */0;
-    }
+    return {
+            narrow: collision.narrow,
+            broad: collision.broad,
+            wallsVertical: match.verticalDirection === /* Down */0 ? /* Up */1 : /* Down */0,
+            playerVector: collision.playerVector,
+            playerVertical: collision.playerVertical,
+            predictedY: collision.predictedY
+          };
+  } else {
+    return collision;
   }
-  
 }
 
 var Walls = {
@@ -143,36 +158,25 @@ var Walls = {
 };
 
 function make$5(state) {
-  var collision_wallsVertical = make$4(state);
-  var collision = {
-    horizontalDirection: undefined,
-    wallsVertical: collision_wallsVertical,
-    playerVector: undefined,
-    playerVertical: undefined,
-    predictedY: undefined
-  };
-  var match = collision_wallsVertical;
+  var collision = make$4({
+        narrow: undefined,
+        broad: undefined,
+        wallsVertical: undefined,
+        playerVector: undefined,
+        playerVertical: undefined,
+        predictedY: undefined
+      }, state);
+  var match = collision.wallsVertical;
   if (match !== undefined) {
     return collision;
   }
-  var collision$1 = make$1(collision, state);
-  var match$1 = collision$1.horizontalDirection;
-  if (match$1 === undefined) {
+  var collision$1 = make$3(make$1(collision, state), state);
+  var match$1 = collision$1.narrow;
+  if (match$1 !== undefined) {
+    return make(make$2(collision$1, state), state);
+  } else {
     return collision$1;
   }
-  var collision$2 = make$3(collision$1, state);
-  var match$2 = collision$2.horizontalDirection;
-  if (match$2 === undefined) {
-    return collision$2;
-  }
-  var collision$3 = make$2(collision$2, state);
-  return {
-          horizontalDirection: collision$3.horizontalDirection,
-          wallsVertical: collision$3.wallsVertical,
-          playerVector: collision$3.playerVector,
-          playerVertical: collision$3.playerVertical,
-          predictedY: make(collision$3, state)
-        };
 }
 
 export {

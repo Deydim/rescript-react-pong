@@ -1,5 +1,6 @@
 type t = {
-  horizontalDirection: option<Model.horizontalDirection>,
+  narrow: option<Model.horizontalDirection>,
+  broad: option<Model.horizontalDirection>,
   wallsVertical: option<Model.verticalDirection>,
   playerVector: option<Model.ballVector>,
   playerVertical: option<Model.verticalDirection>,
@@ -7,7 +8,7 @@ type t = {
 }
 
 module PredictBallHit = {
-  let make: (t, Model.t) => option<float> = (
+  let make: (t, Model.t) => t = (
     collision,
     {
       ball: {x, y, size, vector},
@@ -19,7 +20,7 @@ module PredictBallHit = {
     let (vx, vy) = Model.getVector(Belt.Option.getWithDefault(collision.playerVector, vector))
     let x = ref(x)
     let y = ref(y)
-    let left = ref(collision.horizontalDirection == Some(Left) ? -1. : 1.)
+    let left = ref(collision.narrow == Some(Left) ? -1. : 1.)
     let up = ref(collision.playerVertical == Some(Up) ? -1. : 1.)
     while x.contents >= playerWidth && x.contents < fieldWidth -. playerWidth {
       x.contents = x.contents +. vx->Belt.Int.toFloat *. left.contents
@@ -34,10 +35,15 @@ module PredictBallHit = {
         up.contents = -.up.contents
       }
     }
-    Some(
-      y.contents +.
-      Js.Math.round(playerSize /. 2. *. Js.Math.random() -. 4.) *. (Js.Math.random() < 0.5 ? -1. : 1.),
-    )
+    {
+      ...collision,
+      predictedY: Some(
+        y.contents +.
+        Js.Math.round(playerSize /. 2. *. Js.Math.random() -. 4.) *. (
+          Js.Math.random() < 0.5 ? -1. : 1.
+        ),
+      ),
+    }
   }
 }
 
@@ -53,15 +59,16 @@ module Broad = {
     switch dir {
     | Left => {
         ...collision,
-        horizontalDirection: ballCenterX -. leftPlayerCenterX == limit ? Some(Left) : None,
+        broad: ballCenterX -. leftPlayerCenterX == limit ? Some(Left) : None,
       }
     | Right => {
         ...collision,
-        horizontalDirection: rightPlayerCenterX -. ballCenterX == limit ? Some(Right) : None,
+        broad: rightPlayerCenterX -. ballCenterX == limit ? Some(Right) : None,
       }
     }
   }
 }
+
 module VectorChange = {
   let make: (t, Model.t) => t = (collision, state) => {
     let ballCenter = state.ball.y +. state.ball.size /. 2.
@@ -92,7 +99,7 @@ module Narrow = {
     let {rightPlayerY, leftPlayerY, ball: {y: ballY, size: ballSize}, playerSize} = state
     {
       ...collision,
-      horizontalDirection: switch collision.horizontalDirection {
+      narrow: switch collision.broad {
       | Some(Right) =>
         ballY +. ballSize > rightPlayerY && ballY < rightPlayerY +. playerSize ? Some(Left) : None
       | Some(Left) =>
@@ -104,63 +111,46 @@ module Narrow = {
 }
 
 module Walls = {
-  let make: Model.t => option<Model.verticalDirection> = ({
-    ball: {y: ballY, size: ballSize, verticalDirection: dir},
-    fieldLimits: {bottom},
-  }) => {
+  let make: (t, Model.t) => t = (
+    collision,
+    {ball: {y: ballY, size: ballSize, verticalDirection: dir}, fieldLimits: {bottom}},
+  ) => {
     if ballY == 10. || ballY == bottom -. ballSize +. 10. {
-      dir == Down ? Some(Up) : Some(Down)
+      {
+        ...collision,
+        wallsVertical: dir == Down ? Some(Up) : Some(Down),
+      }
     } else {
-      None
+      collision
     }
   }
 }
 
 let make: Model.t => t = state => {
   {
-    horizontalDirection: None,
+    broad: None,
+    narrow: None,
     wallsVertical: None,
     playerVector: None,
     playerVertical: None,
     predictedY: None,
-  }->(
+  }
+  ->Walls.make(state)
+  ->(
     collision =>
-      {
-        ...collision,
-        wallsVertical: Walls.make(state),
-      }->(
-        collision =>
-          switch collision.wallsVertical {
-          | Some(_) => collision
-          | None =>
-            collision
-            ->Broad.make(state)
-            ->(
-              collision =>
-                switch collision.horizontalDirection {
-                | Some(_) =>
-                  collision
-                  ->Narrow.make(state)
-                  ->(
-                    collision =>
-                      switch collision.horizontalDirection {
-                      | Some(_) =>
-                        collision
-                        ->VectorChange.make(state)
-                        ->(
-                          collision => {
-                            ...collision,
-                            predictedY: PredictBallHit.make(collision, state),
-                          }
-                        )
-
-                      | None => collision
-                      }
-                  )
-                | None => collision
-                }
-            )
-          }
-      )
+      switch collision.wallsVertical {
+      | Some(_) => collision
+      | None =>
+        collision
+        ->Broad.make(state)
+        ->Narrow.make(state)
+        ->(
+          collision =>
+            switch collision.narrow {
+            | Some(_) => collision->VectorChange.make(state)->PredictBallHit.make(state)
+            | None => collision
+            }
+        )
+      }
   )
 }

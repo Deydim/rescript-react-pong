@@ -15,12 +15,15 @@ type ballDirection = (verticalDirection, horizontalDirection)
 type keys = {
   arrowUp: bool,
   arrowDown: bool,
+  keyA: bool,
+  keyZ: bool
 }
 type limits = {
   bottom: float,
   right: float,
 }
 type ball = {
+  isOut: bool,
   x: float,
   y: float,
   size: float,
@@ -30,13 +33,12 @@ type ball = {
   vector: ballVector,
   predictedY: float,
 }
-type control = Human | NPC
 
 type t = {
   rightPlayerY: float,
   leftPlayerY: float,
-  rightPlayerControl: control,
-  leftPlayerControl: control,
+  rightPlayerControl: Config.control,
+  leftPlayerControl: Config.control,
   playerWidth: float,
   keys: keys,
   game: game,
@@ -62,6 +64,8 @@ type init = {
   ballSize: float,
   ballX: float,
   ballY: float,
+  leftPlayerControl: Config.control,
+  rightPlayerControl: Config.control
 }
 type progress = float
 type player = RightPlayer | LeftPlayer
@@ -74,7 +78,7 @@ type action =
   | SetFrameTime(float)
   | None
 
-let keys = {arrowUp: false, arrowDown: false}
+let keys = {arrowUp: false, arrowDown: false, keyA: false, keyZ: false}
 
 let ballVectorTable = [(5, 0.3), (4, 1.2), (3, 2.)]
 
@@ -92,6 +96,8 @@ let init = (config: Config.t) => {
   let ballSize = config.ball_size->Belt.Int.toFloat
   let ballX = (fieldWidth -. ballSize) /. 2.
   let ballY = (fieldHeight -. ballSize) /. 2.
+  let leftPlayerControl = config.left_player_control 
+  let rightPlayerControl = config.right_player_control
   {
     offsetLeft: offsetLeft,
     offsetTop: offsetTop,
@@ -108,6 +114,8 @@ let init = (config: Config.t) => {
     ballY: ballY,
     leftPlayerCenterX: leftPlayerX +. playerWidth /. 2.,
     rightPlayerCenterX: rightPlayerX +. playerWidth /. 2.,
+    leftPlayerControl: leftPlayerControl,
+    rightPlayerControl: rightPlayerControl
   }
 }
 
@@ -121,16 +129,19 @@ let make = ({
   fieldHeight,
   fieldWidth,
   playerSize,
+  leftPlayerControl,
+  rightPlayerControl,
 }) => {
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
-  rightPlayerControl: Human,
-  leftPlayerControl: Human,
+  rightPlayerControl: rightPlayerControl,
+  leftPlayerControl: leftPlayerControl,
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,
   game: NotStarted,
   ball: {
+    isOut: false,
     x: ballX,
     y: ballY,
     speed: 2.,
