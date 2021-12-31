@@ -1,4 +1,4 @@
-@val external requestAnimationFrame: ('a => unit) => int = "requestAnimationFrame"
+@val external requestAnimationFrame: (float => unit) => int = "requestAnimationFrame"
 @val external cancelAnimationFrame: int => unit = "cancelAnimationFrame"
 
 let updateState = (state: Model.t, action: Model.action) => {
@@ -12,14 +12,13 @@ let updateState = (state: Model.t, action: Model.action) => {
       (collision: Collision.t) => {
         switch collision.wallsVertical {
         | Some(dir) => {...state, ball: {...state.ball, verticalDirection: dir}}
-        | None =>
-         {
+        | None => {
             ...state,
             ball: {
               ...state.ball,
               isOut: switch (collision.broad, collision.playerVector) {
-                | (Some(_), None) => true
-                | _ => false
+              | (Some(_), None) => true
+              | _ => false
               },
               horizontalDirection: collision.narrow->Belt.Option.getWithDefault(
                 state.ball.horizontalDirection,
@@ -85,8 +84,7 @@ let updateState = (state: Model.t, action: Model.action) => {
         ...state,
         game: switch state.game {
         | NotStarted
-        | Paused =>
-          Playing
+        | Paused => Playing
         | Playing => Paused
         },
       }
@@ -131,8 +129,6 @@ module Tick = {
   @react.component
   let make = (~state: Model.t, ~send: Model.action => unit) => {
     let tick = time => {
-      send(SetFrameTime(time))
-
       let movePlayer: Model.player => Model.action = player => {
         let isActivePlayer = switch state.ball.horizontalDirection {
         | Left => player == LeftPlayer
@@ -186,13 +182,14 @@ module Tick = {
         }
       }
 
+      send(SetFrameTime(time))
       movePlayer(LeftPlayer)->send
       movePlayer(RightPlayer)->send
       send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
-       send(BallMove(progress))
+        send(BallMove(progress))
       }
     }
     React.useEffect3(() => {

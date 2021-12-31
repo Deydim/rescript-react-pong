@@ -158,7 +158,6 @@ let make = ({
   oldTime: 0.,
 }
 
-
 let getVector = (vec: ballVector) => {
   switch vec {
   | Slight => ballVectorTable[0]

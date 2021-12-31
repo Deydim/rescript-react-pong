@@ -8,8 +8,6 @@ RUN npm install
 
 COPY . .
 
-
 ENTRYPOINT ["npm"]
 CMD ["start"]
 EXPOSE 3000
-# ENTRYPOINT ["/bin/bash", "-c"]

@@ -329,10 +329,6 @@ function Update$Tick(Props) {
   var state = Props.state;
   var send = Props.send;
   var tick = function (time) {
-    Curry._1(send, {
-          TAG: /* SetFrameTime */4,
-          _0: time
-        });
     var movePlayer = function (player) {
       var match = state.ball.horizontalDirection;
       var isActivePlayer = match ? player === /* RightPlayer */0 : player === /* LeftPlayer */1;
@@ -433,6 +429,10 @@ function Update$Tick(Props) {
         return /* None */1;
       }
     };
+    Curry._1(send, {
+          TAG: /* SetFrameTime */4,
+          _0: time
+        });
     Curry._1(send, movePlayer(/* LeftPlayer */1));
     Curry._1(send, movePlayer(/* RightPlayer */0));
     Curry._1(send, /* HandleCollisions */0);
