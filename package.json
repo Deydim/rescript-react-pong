@@ -1,5 +1,5 @@
 {
-  "name": "vite-react-rescript-starter",
+  "name": "rescript-react-pong",
   "homepage": "http://deydim.github.io/rescript-react-pong",
   "version": "1.0.0",
   "scripts": {
@@ -7,7 +7,9 @@
     "clean": "rescript clean -with-deps",
     "format": "rescript format -all",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "react": "^17.0.2",
