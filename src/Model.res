@@ -144,7 +144,7 @@ let make = ({
     isOut: false,
     x: ballX,
     y: ballY,
-    speed: 2.,
+    speed: 4.,
     horizontalDirection: Left,
     verticalDirection: Down,
     vector: Slight,
