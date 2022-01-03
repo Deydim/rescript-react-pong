@@ -72,7 +72,7 @@ function make(param) {
             x: param.ballX,
             y: param.ballY,
             size: param.ballSize,
-            speed: 4,
+            speed: 2.2,
             horizontalDirection: /* Left */0,
             verticalDirection: /* Down */0,
             vector: /* Slight */0,
