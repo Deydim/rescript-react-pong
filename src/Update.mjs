@@ -5,6 +5,7 @@ import * as Model from "./Model.mjs";
 import * as React from "react";
 import * as Collision from "./Collision.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function updateState(state, action) {
   if (typeof action === "number") {
@@ -447,10 +448,7 @@ function Update$Tick(Props) {
   };
   React.useEffect((function () {
           var match = state.game;
-          return Belt_Option.map(match !== 0 ? (console.log(state), undefined) : requestAnimationFrame(tick), (function (timer, param) {
-                        cancelAnimationFrame(timer);
-                        
-                      }));
+          return Belt_Option.map(match !== 0 ? (console.log(state), undefined) : Caml_option.some(Curry._1(requestAnimationFrame, tick)), Curry.__1(cancelAnimationFrame));
         }), [
         state.game,
         state,

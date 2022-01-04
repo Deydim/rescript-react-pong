@@ -136,7 +136,7 @@ let make: Model.t => t = state => {
     predictedY: None,
   }
   ->Walls.make(state)
-  ->(
+  ->( 
     collision =>
       switch collision.wallsVertical {
       | Some(_) => collision

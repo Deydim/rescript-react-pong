@@ -1,5 +1,5 @@
-@val external requestAnimationFrame: (float => unit) => int = "requestAnimationFrame"
-@val external cancelAnimationFrame: int => unit = "cancelAnimationFrame"
+@val external requestTick: 'a = "requestAnimationFrame"
+@val external cancelTick: 'a = "cancelAnimationFrame"
 
 let updateState = (state: Model.t, action: Model.action) => {
   switch action {
@@ -84,7 +84,8 @@ let updateState = (state: Model.t, action: Model.action) => {
         ...state,
         game: switch state.game {
         | NotStarted
-        | Paused => Playing
+        | Paused =>
+          Playing
         | Playing => Paused
         },
       }
@@ -194,12 +195,12 @@ module Tick = {
     }
     React.useEffect3(() => {
       switch state.game {
-      | Playing => Some(requestAnimationFrame(tick))
+      | Playing => Some(requestTick(tick))
       | _ => {
           Js.log(state)
           None
         }
-      }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
+      }->Belt.Option.map(timer => cancelTick(timer))
     }, (state.game, state, tick))
     React.null
   }
