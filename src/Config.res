@@ -11,7 +11,7 @@ type action =
   | SetFieldSize(int)
   | SetPlayerSize(int)
   | SetBallSize(int)
-  | ToggleRightPlayerControl
+  | ToggleRightPlayerControl 
   | ToggleLeftPlayerControl
 
 let toggleControl = value => value == NPC ? Human : NPC
