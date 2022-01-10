@@ -1,5 +1,5 @@
-@val external requestTick: 'a = "requestAnimationFrame"
-@val external cancelTick: 'a = "cancelAnimationFrame"
+@val external requestTick: (float => unit) => int = "requestAnimationFrame"
+@val external cancelTick: int => unit = "cancelAnimationFrame"
 
 let updateState = (state: Model.t, action: Model.action) => {
   switch action {
@@ -200,7 +200,7 @@ module Tick = {
           Js.log(state)
           None
         }
-      }->Belt.Option.map(timer => cancelTick(timer))
+      }->Belt.Option.map((timer, ()) => cancelTick(timer))
     }, (state.game, state, tick))
     React.null
   }
