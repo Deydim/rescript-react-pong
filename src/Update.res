@@ -184,8 +184,8 @@ module Tick = {
       }
 
       send(SetFrameTime(time))
-      movePlayer(LeftPlayer)->send
-      movePlayer(RightPlayer)->send
+      send(movePlayer(LeftPlayer))
+      send(movePlayer(RightPlayer))
       send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
