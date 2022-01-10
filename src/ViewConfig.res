@@ -11,7 +11,7 @@ module Slider = {
     </tr>
   </>
 }
-2
+
 module Switch = {
   @react.component
   let make = (~defaultChecked, ~label, ~onChange) => {
