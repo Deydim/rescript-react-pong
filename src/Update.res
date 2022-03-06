@@ -1,5 +1,5 @@
-@val external requestAnimationFrame: ('a => unit) => int = "requestAnimationFrame"
-@val external cancelAnimationFrame: int => unit = "cancelAnimationFrame"
+@val external requestTick: (float => unit) => int = "requestAnimationFrame"
+@val external cancelTick: int => unit = "cancelAnimationFrame"
 
 let updateState = (state: Model.t, action: Model.action) => {
   switch action {
@@ -9,13 +9,28 @@ let updateState = (state: Model.t, action: Model.action) => {
     }
   | HandleCollisions =>
     Collision.make(state)->(
-      ((hor, vert)) => {
-        ...state,
-        ball: {
-          ...state.ball,
-          horizontalDirection: hor->Belt.Option.getWithDefault(state.ball.horizontalDirection),
-          verticalDirection: vert->Belt.Option.getWithDefault(state.ball.verticalDirection),
-        },
+      (collision: Collision.t) => {
+        switch collision.wallsVertical {
+        | Some(dir) => {...state, ball: {...state.ball, verticalDirection: dir}}
+        | None => {
+            ...state,
+            ball: {
+              ...state.ball,
+              isOut: switch (collision.broad, collision.playerVector) {
+              | (Some(_), None) => true
+              | _ => false
+              },
+              horizontalDirection: collision.narrow->Belt.Option.getWithDefault(
+                state.ball.horizontalDirection,
+              ),
+              vector: collision.playerVector->Belt.Option.getWithDefault(state.ball.vector),
+              verticalDirection: collision.playerVertical->Belt.Option.getWithDefault(
+                state.ball.verticalDirection,
+              ),
+              predictedY: collision.predictedY->Belt.Option.getWithDefault(state.ball.predictedY),
+            },
+          }
+        }
       }
     )
 
@@ -30,40 +45,54 @@ let updateState = (state: Model.t, action: Model.action) => {
         size: init.ballSize,
       },
       playerSize: init.playerSize,
+      leftPlayerControl: init.leftPlayerControl,
+      rightPlayerControl: init.rightPlayerControl,
     }
-  | PlayerUp => {
-      ...state,
-      rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
-      leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
-    }
-  | PlayerDown => {
-      ...state,
-      rightPlayerY: Js.Math.min_float(
-        state.rightPlayerY +. 5.,
-        state.fieldLimits.bottom -. state.playerSize +. 10.,
-      ),
-      leftPlayerY: Js.Math.min_float(
-        state.leftPlayerY +. 5.,
-        state.fieldLimits.bottom -. state.playerSize +. 10.,
-      ),
-    }
-  | Start => {
-      ...state,
-      game: Playing,
-    }
-  | Pause => {
-      ...state,
-      game: Paused,
+  | MovePlayer(dir: Model.verticalDirection, player) =>
+    switch (dir, player) {
+    | (Up, LeftPlayer) => {
+        ...state,
+        leftPlayerY: Js.Math.max_float(state.leftPlayerY -. 5., 10.),
+      }
+    | (Up, RightPlayer) => {
+        ...state,
+        rightPlayerY: Js.Math.max_float(state.rightPlayerY -. 5., 10.),
+      }
+
+    | (Down, LeftPlayer) => {
+        ...state,
+        leftPlayerY: Js.Math.min_float(
+          state.leftPlayerY +. 5.,
+          state.fieldLimits.bottom -. state.playerSize +. 10.,
+        ),
+      }
+    | (Down, RightPlayer) => {
+        ...state,
+        rightPlayerY: Js.Math.min_float(
+          state.rightPlayerY +. 5.,
+          state.fieldLimits.bottom -. state.playerSize +. 10.,
+        ),
+      }
     }
   | KeyEvent(type_, key) =>
     switch key {
     | "ArrowUp" => {...state, keys: {...state.keys, arrowUp: type_ == "keydown"}}
     | "ArrowDown" => {...state, keys: {...state.keys, arrowDown: type_ == "keydown"}}
-    | " " => {...state, game: state.game == Paused ? Playing : Paused}
+    | "a" => {...state, keys: {...state.keys, keyA: type_ == "keydown"}}
+    | "z" => {...state, keys: {...state.keys, keyZ: type_ == "keydown"}}
+    | " " => {
+        ...state,
+        game: switch state.game {
+        | NotStarted
+        | Paused =>
+          Playing
+        | Playing => Paused
+        },
+      }
     | _ => state
     }
   | BallMove(progress) => {
-      let (deltaX, deltaY) = Model.ballVectorTable[(state.ball.vectorIndex :> int)]->(
+      let (deltaX, deltaY) = Model.getVector(state.ball.vector)->(
         ((vx, vy)) =>
           switch (state.ball.verticalDirection, state.ball.horizontalDirection) {
           | (Down, Right) => (vx, vy)
@@ -93,35 +122,86 @@ let updateState = (state: Model.t, action: Model.action) => {
         },
       }
     }
+  | None => state
   }
 }
 
 module Tick = {
   @react.component
-  let make = (~state: Model.t, ~dispatch: Model.action => unit) => {
+  let make = (~state: Model.t, ~send: Model.action => unit) => {
     let tick = time => {
-      dispatch(SetFrameTime(time))
-      switch (state.keys.arrowUp, state.keys.arrowDown) {
-      | (false, true) => dispatch(PlayerDown)
-      | (true, false) => dispatch(PlayerUp)
-      | _ => ()
+      let movePlayer: Model.player => Model.action = player => {
+        let isActivePlayer = switch state.ball.horizontalDirection {
+        | Left => player == LeftPlayer
+        | Right => player == RightPlayer
+        }
+        let (playerControl, playerY) = switch (state.ball.horizontalDirection, isActivePlayer) {
+        | (Left, true) => (state.leftPlayerControl, state.leftPlayerY)
+        | (Left, false) => (state.rightPlayerControl, state.rightPlayerY)
+        | (Right, true) => (state.rightPlayerControl, state.rightPlayerY)
+        | (Right, false) => (state.leftPlayerControl, state.leftPlayerY)
+        }
+        switch playerControl {
+        | NPC =>
+          if (
+            isActivePlayer &&
+            Js.Math.abs_float(state.ball.predictedY -. (playerY +. state.playerSize /. 2.)) > 4.
+          ) {
+            switch state.ball.predictedY > playerY +. state.playerSize /. 2. {
+            | true => MovePlayer(Down, player)
+            | false => MovePlayer(Up, player)
+            }
+          } else if (
+            !isActivePlayer &&
+            Js.Math.abs_float(
+              state.fieldLimits.bottom /. 2. -. (playerY +. state.playerSize /. 2.),
+            ) > 4.
+          ) {
+            switch state.fieldLimits.bottom /. 2. > playerY +. state.playerSize /. 2. {
+            | true => MovePlayer(Down, player)
+            | false => MovePlayer(Up, player)
+            }
+          } else {
+            None
+          }
+        | Human =>
+          switch player {
+          | RightPlayer =>
+            switch (state.keys.arrowUp, state.keys.arrowDown) {
+            | (false, true) => MovePlayer(Down, RightPlayer)
+            | (true, false) => MovePlayer(Up, RightPlayer)
+            | _ => None
+            }
+
+          | LeftPlayer =>
+            switch (state.keys.keyA, state.keys.keyZ) {
+            | (false, true) => MovePlayer(Down, LeftPlayer)
+            | (true, false) => MovePlayer(Up, LeftPlayer)
+            | _ => None
+            }
+          }
+        }
       }
-      dispatch(HandleCollisions)
+
+      send(SetFrameTime(time))
+      send(movePlayer(LeftPlayer))
+      send(movePlayer(RightPlayer))
+      send(HandleCollisions)
 
       let progress = (time -. state.oldTime) /. 15.
       if progress < 2. {
-        dispatch(BallMove(progress))
+        send(BallMove(progress))
       }
     }
-    React.useEffect2(() => {
+    React.useEffect3(() => {
       switch state.game {
-      | Playing => Some(requestAnimationFrame(tick))
+      | Playing => Some(requestTick(tick))
       | _ => {
           Js.log(state)
           None
         }
-      }->Belt.Option.map((timer, ()) => cancelAnimationFrame(timer))
-    }, (state.oldTime, state.game))
+      }->Belt.Option.map((timer, ()) => cancelTick(timer))
+    }, (state.game, state, tick))
     React.null
   }
 }

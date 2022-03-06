@@ -1,5 +1,6 @@
 {
-  "name": "vite-react-rescript-starter",
+  "name": "rescript-react-pong",
+  "homepage": "http://deydim.github.io/rescript-react-pong",
   "version": "1.0.0",
   "scripts": {
     "build": "vite build",

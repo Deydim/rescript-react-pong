@@ -4,18 +4,18 @@ external addEventListener: (string, ReactEvent.Keyboard.t => 'a) => unit = "addE
 
 let floatToPx = number => number->Belt.Float.toString ++ "px"
 
-let keyEventHandler = (evt, ~dispatch: Model.action => unit) => {
+let keyEventHandler = (evt, ~send: Model.action => unit) => {
   switch ReactEvent.Keyboard.key(evt) {
-  | "ArrowUp" | "ArrowDown" => {
+  | "ArrowUp" | "ArrowDown" | "a" | "z" => {
       ReactEvent.Keyboard.preventDefault(evt)
-      dispatch(
+      send(
         KeyEvent(ReactEvent.Keyboard.type_(evt), ReactEvent.Keyboard.key(evt))
       )
     }
   | " " => {
       ReactEvent.Keyboard.preventDefault(evt)
       if ReactEvent.Keyboard.type_(evt) == "keydown" {
-        dispatch(
+        send(
           KeyEvent(ReactEvent.Keyboard.type_(evt), ReactEvent.Keyboard.key(evt))
         )
       }
@@ -39,28 +39,30 @@ let make = (~config: Config.t) => {
     ballSize
   } = init
 
-  let (state, dispatch) = React.useReducer(
+  let (state, send) = React.useReducer(
     Update.updateState, 
     Model.make(init)
   )
   
-  React.useEffect0(() => {
-    addEventListener("keydown", evt => keyEventHandler(evt, ~dispatch))
-    addEventListener("keyup", evt => keyEventHandler(evt, ~dispatch))
+  React.useEffect1(() => {
+    addEventListener("keydown", evt => keyEventHandler(evt, ~send))
+    addEventListener("keyup", evt => keyEventHandler(evt, ~send))
     Some(
       () => {
         removeEventListener("keyup")
         removeEventListener("keydown")
       },
     )
-  })
+  },[send])
 
   React.useEffect1( () => {
-    dispatch(UpdateConfig(init))
-    dispatch(PlayerUp)
-    dispatch(PlayerDown)
-    dispatch(BallMove(0.))
-    // moves players and ball to force update of their position within field limits
+    send(UpdateConfig(init))
+    send(MovePlayer(Up, LeftPlayer))
+    send(MovePlayer(Down, LeftPlayer))
+    send(MovePlayer(Up, RightPlayer))
+    send(MovePlayer(Down, RightPlayer))
+    send(BallMove(0.))
+    // moves players and ball to force an update of the stale state
     None
   }, [config])
 
@@ -96,7 +98,7 @@ let make = (~config: Config.t) => {
       )}
     />
     <div
-      className="ball"
+      className = {state.ball.isOut ? "ball-out" : "ball-in"}
       style={ReactDOMStyle.make(
         ~left=(state.ball.x +. offsetLeft)->floatToPx,
         ~top=(state.ball.y +. offsetTop)->floatToPx,
@@ -105,8 +107,23 @@ let make = (~config: Config.t) => {
         ~borderRadius=(ballSize /. 2.)->floatToPx,
         (),
       )}
-
     />
-    <Update.Tick dispatch state />
+    <div style = {
+    ReactDOMStyle.make(
+      ~position = "absolute",
+      ~top = (offsetTop +. init.fieldHeight +. 50.)->floatToPx,
+      ~left = (offsetLeft +.  init.fieldWidth /. 2. -. 150.)->floatToPx,
+      ~width = "300px",
+      ~textAlign = "center",
+      ()
+    )
+  }>
+    {switch state.game {
+      | Playing => {React.null} 
+      | Paused => {React.string("Paused. Press space to resume.")} 
+      | NotStarted => {React.string("Press space to start.")}
+    }}
+    </div>
+    <Update.Tick send state />
   </>
 }

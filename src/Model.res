@@ -1,10 +1,9 @@
-//    TYPES
 
 type eventType = string
 type key = string
-type game = Playing | Over | Paused
+type game = Playing | Paused | NotStarted
 
-type ballVectorTableIndex = [#0 | #1 | #2 ]
+type ballVector = Slight | Medium | Sharp
 type horizontalDirection =
   | Left
   | Right
@@ -16,28 +15,33 @@ type ballDirection = (verticalDirection, horizontalDirection)
 type keys = {
   arrowUp: bool,
   arrowDown: bool,
+  keyA: bool,
+  keyZ: bool
 }
 type limits = {
   bottom: float,
   right: float,
 }
 type ball = {
+  isOut: bool,
   x: float,
   y: float,
   size: float,
   speed: float,
   horizontalDirection: horizontalDirection,
   verticalDirection: verticalDirection,
-  vectorIndex: ballVectorTableIndex,
+  vector: ballVector,
+  predictedY: float,
 }
 
 type t = {
   rightPlayerY: float,
   leftPlayerY: float,
+  rightPlayerControl: Config.control,
+  leftPlayerControl: Config.control,
   playerWidth: float,
   keys: keys,
   game: game,
-  horizontalCollision: option<horizontalDirection>,
   ball: ball,
   fieldLimits: limits,
   playerSize: float,
@@ -60,21 +64,21 @@ type init = {
   ballSize: float,
   ballX: float,
   ballY: float,
+  leftPlayerControl: Config.control,
+  rightPlayerControl: Config.control
 }
 type progress = float
-
+type player = RightPlayer | LeftPlayer
 type action =
   | UpdateConfig(init)
-  | PlayerUp
-  | PlayerDown
-  | Start
-  | Pause
+  | MovePlayer(verticalDirection, player)
   | KeyEvent(eventType, key)
   | BallMove(progress)
   | HandleCollisions
   | SetFrameTime(float)
+  | None
 
-let keys = {arrowUp: false, arrowDown: false}
+let keys = {arrowUp: false, arrowDown: false, keyA: false, keyZ: false}
 
 let ballVectorTable = [(5, 0.3), (4, 1.2), (3, 2.)]
 
@@ -92,6 +96,8 @@ let init = (config: Config.t) => {
   let ballSize = config.ball_size->Belt.Int.toFloat
   let ballX = (fieldWidth -. ballSize) /. 2.
   let ballY = (fieldHeight -. ballSize) /. 2.
+  let leftPlayerControl = config.left_player_control 
+  let rightPlayerControl = config.right_player_control
   {
     offsetLeft: offsetLeft,
     offsetTop: offsetTop,
@@ -108,10 +114,10 @@ let init = (config: Config.t) => {
     ballY: ballY,
     leftPlayerCenterX: leftPlayerX +. playerWidth /. 2.,
     rightPlayerCenterX: rightPlayerX +. playerWidth /. 2.,
+    leftPlayerControl: leftPlayerControl,
+    rightPlayerControl: rightPlayerControl
   }
 }
-
-// STATE
 
 let make = ({
   rightPlayerY,
@@ -123,26 +129,39 @@ let make = ({
   fieldHeight,
   fieldWidth,
   playerSize,
+  leftPlayerControl,
+  rightPlayerControl,
 }) => {
   rightPlayerY: rightPlayerY,
   leftPlayerY: leftPlayerY,
+  rightPlayerControl: rightPlayerControl,
+  leftPlayerControl: leftPlayerControl,
   playerSize: playerSize,
   playerWidth: playerWidth,
   keys: keys,
-  game: Paused,
-  horizontalCollision: None,
+  game: NotStarted,
   ball: {
+    isOut: false,
     x: ballX,
     y: ballY,
-    speed: 0.8,
+    speed: 2.2,
     horizontalDirection: Left,
     verticalDirection: Down,
-    vectorIndex: #1,
+    vector: Slight,
     size: ballSize,
+    predictedY: fieldHeight /. 2.,
   },
   fieldLimits: {
     bottom: fieldHeight,
     right: fieldWidth,
   },
   oldTime: 0.,
+}
+
+let getVector = (vec: ballVector) => {
+  switch vec {
+  | Slight => ballVectorTable[0]
+  | Medium => ballVectorTable[1]
+  | Sharp => ballVectorTable[2]
+  }
 }

@@ -8,5 +8,3 @@ let make = () => {
     <> <TestQuery/><ViewConfig config setConfig /> <ViewGame config /> </>
   </ApolloClient.React.ApolloProvider>
 }
-
-

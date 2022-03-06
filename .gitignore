@@ -3,8 +3,10 @@ node_modules
 dist
 dist-ssr
 *.local
+# build
 
 # ReScript
 .bsb.lock
 .merlin
 /lib/
+.gitconfig
